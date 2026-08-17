@@ -1,0 +1,19 @@
+[Unit]
+Description=generator-doc-gost Microservice (ГОСТ Document Generator)
+After=network.target
+
+[Service]
+Type=simple
+User=tmdata
+WorkingDirectory=/opt/tmdata-frontend/docgen
+ExecStart=/usr/bin/node dist/server.cjs
+Restart=on-failure
+RestartSec=5s
+Environment=NODE_ENV=production
+Environment=PORT=3000
+EnvironmentFile=-/opt/tmdata-frontend/docgen/.env
+StandardOutput=append:/var/log/tmdata/docgen.log
+StandardError=append:/var/log/tmdata/docgen-error.log
+
+[Install]
+WantedBy=multi-user.target

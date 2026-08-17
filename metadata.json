@@ -1,0 +1,8 @@
+{
+  "name": "Remix Генератор документов (версия 2)",
+  "description": "Приложение для создания и экспорта документов на фирменном бланке организации с гибкой настройкой шапки, реквизитов, подписей и печатью.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

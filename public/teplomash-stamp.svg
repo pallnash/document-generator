@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 240 240" width="240" height="240">
+  <circle cx="120" cy="120" r="112" stroke="#1d4ed8" stroke-width="4.5" fill="none" opacity="0.88"/>
+  <circle cx="120" cy="120" r="66" stroke="#1d4ed8" stroke-width="2.5" fill="none" opacity="0.88"/>
+  <path id="stampArcTop" d="M 28,120 A 92,92 0 1,1 212,120" fill="none"/>
+  <path id="stampArcBottom" d="M 212,120 A 92,92 0 0,1 28,120" fill="none"/>
+  <text fill="#1d4ed8" font-family="Arial, sans-serif" font-size="10.5" font-weight="bold" opacity="0.92">
+    <textPath href="#stampArcTop" startOffset="50%" text-anchor="middle">АКЦИОНЕРНОЕ ОБЩЕСТВО «НПО «ТЕПЛОМАШ»</textPath>
+  </text>
+  <text fill="#1d4ed8" font-family="Arial, sans-serif" font-size="10" font-weight="bold" opacity="0.92">
+    <textPath href="#stampArcBottom" startOffset="50%" text-anchor="middle">САНКТ-ПЕТЕРБУРГ * ОГРН 1027809212573</textPath>
+  </text>
+  <text x="120" y="98" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1d4ed8" text-anchor="middle" opacity="0.95">Бюро автоматики</text>
+  <text x="120" y="120" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#1d4ed8" text-anchor="middle" opacity="0.9">Инженер-программист</text>
+  <text x="120" y="142" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1d4ed8" text-anchor="middle" opacity="0.92">ДЛЯ ДОКУМЕНТОВ</text>
+</svg>

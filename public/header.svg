@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" width="1200" height="240">
+  <rect width="1200" height="240" fill="#ffffff"/>
+  <g transform="translate(10, 5)">
+    <g transform="translate(0, 5)">
+      <path d="M 22,0 L 44,32 L 35,32 L 35,105 L 9,105 L 9,32 L 0,32 Z" fill="#111827"/>
+      <path d="M 22,20 L 36,44 L 29,44 L 29,98 L 15,98 L 15,44 L 8,44 Z" fill="#ffffff"/>
+      <path d="M 22,38 L 30,56 L 25,56 L 25,92 L 19,98 L 19,56 L 14,56 Z" fill="#111827"/>
+      <path d="M 54,0 L 76,32 L 67,32 L 67,105 L 41,105 L 41,32 L 32,32 Z" fill="#111827"/>
+      <path d="M 54,20 L 68,44 L 61,44 L 61,98 L 47,98 L 47,44 L 40,44 Z" fill="#ffffff"/>
+      <path d="M 54,38 L 62,56 L 57,56 L 57,92 L 51,98 L 51,56 L 46,56 Z" fill="#111827"/>
+      <path d="M 86,0 L 108,32 L 99,32 L 99,105 L 73,105 L 73,32 L 64,32 Z" fill="#111827"/>
+      <path d="M 86,20 L 100,44 L 93,44 L 93,98 L 79,98 L 79,44 L 72,44 Z" fill="#ffffff"/>
+      <path d="M 86,38 L 94,56 L 89,56 L 89,92 L 83,98 L 83,56 L 78,56 Z" fill="#111827"/>
+    </g>
+    <text x="122" y="78" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="80" fill="#111827" letter-spacing="-1">Тепломаш</text>
+    <text x="698" y="32" font-family="Arial, sans-serif" font-size="20" fill="#111827">®</text>
+  </g>
+  <g transform="translate(10, 122)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-weight="bold" font-size="15" fill="#111827">Акционерное общество</text>
+    <text x="0" y="18" font-family="Arial, sans-serif" font-weight="bold" font-size="15" fill="#111827">«Научно-производственное объединение «Тепломаш»</text>
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="14" fill="#111827">АО «НПО «Тепломаш»</text>
+    <text x="0" y="51" font-family="Arial, sans-serif" font-size="14" fill="#111827">ИНН 7806112986, КПП 780601001, ОГРН 1027809212573</text>
+    <text x="0" y="67" font-family="Arial, sans-serif" font-size="14" fill="#111827">р/с 40702810055130177203</text>
+    <text x="0" y="83" font-family="Arial, sans-serif" font-size="14" fill="#111827">Северо-Западный Банк ПАО «Сбербанк» г. Санкт-Петербург</text>
+    <text x="0" y="99" font-family="Arial, sans-serif" font-size="14" fill="#111827">к/с 30101810500000000653 БИК 044030653</text>
+  </g>
+  <g transform="translate(1190, 42)" text-anchor="end">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="15" fill="#111827">Адрес: 195279, Санкт-Петербург,</text>
+    <text x="0" y="18" font-family="Arial, sans-serif" font-size="15" fill="#111827">шоссе Революции, д.90, л.А</text>
+    <text x="0" y="38" font-family="Arial, sans-serif" font-size="15" fill="#111827">тел. +7 (812) <tspan font-weight="bold">301-99-40</tspan></text>
+    <text x="0" y="56" font-family="Arial, sans-serif" font-size="15" fill="#111827">тел./факс +7 (812) <tspan font-weight="bold">327-63-82</tspan></text>
+    <text x="0" y="100" font-family="Arial, sans-serif" font-style="italic" font-size="15" fill="#111827">root@teplomash.ru</text>
+    <text x="0" y="118" font-family="Arial, sans-serif" font-style="italic" font-size="15" fill="#111827">www.teplomash.ru</text>
+  </g>
+  <line x1="0" y1="230" x2="1200" y2="230" stroke="#111827" stroke-width="3"/>
+  <line x1="0" y1="234" x2="1200" y2="234" stroke="#111827" stroke-width="1"/>
+</svg>

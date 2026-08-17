@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  
+  /* Eye-safe Enterprise Palette */
+  --bg-app: #F4F4F5;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #F9FAFB;
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #6B7280;
+  
+  /* Enterprise Blue Accent */
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-border: #D1D5DB;
+  --color-border-subtle: #E4E4E7;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Eye-safe Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F4F4F5;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@layer utilities {
+  /* Hide non-printable elements when printing */
+  @media print {
+    html, body, #root {
+      width: 210mm !important;
+      height: 297mm !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: rgb(102, 43, 43) !important;
+      overflow: visible !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    
+    .no-print, header, nav, button, modal {
+      display: none !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* Reset grid / flex layout wrappers during print */
+    .grid, .flex-1, .container, main, section {
+      display: block !important;
+      grid-template-columns: none !important;
+      max-width: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      width: auto !important;
+    }
+
+    #document-a4-sheet {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      transform: none !important;
+      box-shadow: none !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      min-height: 297mm !important;
+      max-height: 297mm !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      visibility: visible !important;
+      background: white !important;
+      border: none !important;
+    }
+
+    .signature-block {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+  }
+}
+
+

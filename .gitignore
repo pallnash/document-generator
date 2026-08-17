@@ -1,0 +1,14 @@
+node_modules/
+build/*
+!build/icon.ico
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+dist-electron/
+
+# Локальная база сотрудников (персональные данные, не для публичного репозитория)
+public/employees.local.json
