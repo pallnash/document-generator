@@ -99,6 +99,18 @@ export interface RegisteredDocument {
   registeredAt: string; // ISO date timestamp
   registeredByRole: 'admin' | 'user';
   digitalSignatureKey?: string;
+  
+  // Revocation in Registry
+  isRevoked?: boolean;
+  revokedAt?: string;
+  revokedBy?: string;
+  revocationReason?: string;
+
+  // Corrections count / summary in Registry
+  correctionsCount?: number;
+  lastCorrectionReason?: string;
+  lastCorrectedAt?: string;
+
   /** Hash-chain целостности реестра: хэш предыдущей записи (GENESIS для самой старой). */
   prevHash?: string;
   /** Hash-chain целостности реестра: FNV-1a 64 от канонической записи + prevHash. */
@@ -379,6 +391,78 @@ export const updateRegisteredDocumentInDb = (updatedDoc: RegisteredDocument): vo
   const registry = getDocumentRegistry();
   const updated = registry.map(item => item.id === updatedDoc.id ? updatedDoc : item);
   saveDocumentRegistry(updated);
+};
+
+export const revokeDocumentInDb = (params: {
+  id: string;
+  regNumber?: string;
+  reason: string;
+  revokedBy: string;
+}): { success: boolean; error?: string } => {
+  const registry = getDocumentRegistry();
+  let target = registry.find(item => item.id === params.id);
+  if (!target && params.regNumber) {
+    const cleanNumber = params.regNumber.trim().toUpperCase();
+    target = registry.find(item => item.regNumber.trim().toUpperCase() === cleanNumber);
+  }
+  if (!target) {
+    return { success: false, error: 'Документ не найден в Едином реестре.' };
+  }
+
+  const updated: RegisteredDocument = {
+    ...target,
+    isRevoked: true,
+    revokedAt: new Date().toLocaleString('ru-RU', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    }),
+    revokedBy: params.revokedBy || 'Администратор',
+    revocationReason: params.reason || 'Отозвано администратором'
+  };
+
+  updateRegisteredDocumentInDb(updated);
+  return { success: true };
+};
+
+export const unrevokeDocumentInDb = (id: string): { success: boolean } => {
+  const registry = getDocumentRegistry();
+  const target = registry.find(item => item.id === id);
+  if (!target) return { success: false };
+
+  const updated: RegisteredDocument = {
+    ...target,
+    isRevoked: false,
+    revokedAt: undefined,
+    revokedBy: undefined,
+    revocationReason: undefined
+  };
+
+  updateRegisteredDocumentInDb(updated);
+  return { success: true };
+};
+
+export const recordCorrectionInRegistry = (params: {
+  regNumber: string;
+  reason: string;
+}): void => {
+  if (!params.regNumber) return;
+  const registry = getDocumentRegistry();
+  const cleanNumber = params.regNumber.trim().toUpperCase();
+  const target = registry.find(item => item.regNumber.trim().toUpperCase() === cleanNumber);
+  if (!target) return;
+
+  const currentCount = target.correctionsCount || 0;
+  const updated: RegisteredDocument = {
+    ...target,
+    correctionsCount: currentCount + 1,
+    lastCorrectionReason: params.reason,
+    lastCorrectedAt: new Date().toLocaleString('ru-RU', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    })
+  };
+
+  updateRegisteredDocumentInDb(updated);
 };
 
 export const deleteRegisteredDocumentFromDb = (id: string): void => {

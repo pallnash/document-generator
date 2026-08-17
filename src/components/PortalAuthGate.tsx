@@ -33,7 +33,7 @@ export const PortalAuthGate: React.FC<PortalAuthGateProps> = ({ authState, onLog
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">Доступ ограничен</h2>
-              <p className="text-xs text-slate-400">Портал TMDATA / Генератор ГОСТ документов</p>
+              <p className="text-xs text-slate-400">Портал TMDATA / Генератор документов</p>
             </div>
           </div>
 

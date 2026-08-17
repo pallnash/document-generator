@@ -33,7 +33,7 @@ describe('fnv1a64Hex', () => {
   });
 
   it('всегда 16 hex-символов (64-bit)', () => {
-    for (const s of ['', 'a', 'Тестовый документ ГОСТ', 'x'.repeat(1000)]) {
+    for (const s of ['', 'a', 'Тестовый документ', 'x'.repeat(1000)]) {
       expect(fnv1a64Hex(s)).toMatch(/^[0-9a-f]{16}$/);
     }
   });

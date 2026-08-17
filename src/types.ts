@@ -73,6 +73,14 @@ export interface DocumentData {
   
   // Content Body
   content: string; // HTML or multi-paragraph text
+
+  // Revocation & Correction status (for published documents)
+  isRevoked?: boolean;
+  revokedAt?: string; // e.g. "17.08.2026 15:30"
+  revokedBy?: string; // e.g. "Администратор (Иванов И.И.)"
+  revocationReason?: string; // e.g. "Отозвано в связи с изменением спецификации заказа"
+
+  corrections?: DocumentCorrection[]; // List of signed corrections
   
   // 4. "Кто написал письмо" and Signature
   signature: SignatureConfig;
@@ -104,6 +112,18 @@ export interface DocumentVersion {
   dataSnapshot: DocumentData;
 }
 
+export interface DocumentCorrection {
+  id: string;
+  timestamp: string; // ISO date timestamp
+  reason: string; // Причина внесенных правок (обязательно)
+  changesSummary: string; // Краткое описание изменений
+  correctedBy: string; // ФИО лица, внесшего исправления
+  correctedByPosition?: string;
+  signatureType: SignatureType;
+  signatureImageUrl?: string | null;
+  digitalSignatureKey?: string;
+}
+
 export interface RegisteredDocument {
   id: string;
   regNumber: string;
@@ -118,6 +138,18 @@ export interface RegisteredDocument {
   registeredAt: string;
   registeredByRole: 'admin' | 'user';
   digitalSignatureKey?: string;
+  
+  // Revocation in Registry
+  isRevoked?: boolean;
+  revokedAt?: string;
+  revokedBy?: string;
+  revocationReason?: string;
+
+  // Corrections count / summary in Registry
+  correctionsCount?: number;
+  lastCorrectionReason?: string;
+  lastCorrectedAt?: string;
+
   /** Hash-chain целостности реестра: хэш предыдущей записи (GENESIS для самой старой). */
   prevHash?: string;
   /** Hash-chain целостности реестра: FNV-1a 64 от канонической записи + prevHash. */

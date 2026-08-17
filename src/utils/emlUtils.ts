@@ -1,12 +1,7 @@
 import { DocumentData } from '../types';
 import { buildStampSvg, renderStampToCanvasPng } from './stampUtils';
 import { TEPLOMASH_EMPLOYEES, TeplomashEmployee } from '../constants/teplomashEmployees';
-import { buildUpcA12Digits } from '../components/DocumentBarcode';
 import { sanitizeHtml } from './sanitizeUtils';
-// jsbarcode — статически, не lazy: DocumentBarcode.tsx (импортирован выше)
-// и так тянет его статическим import'ом, dynamic import() здесь ничего не
-// экономил (vite предупреждал про это при сборке), только усложнял код.
-import JsBarcode from 'jsbarcode';
 
 const transliterateToLatin = (str: string): string => {
   const map: Record<string, string> = {
@@ -262,37 +257,6 @@ export const convertImageUrlToPngBase64 = (
 };
 
 /**
- * Renders document barcode to PNG Base64 string for embedding into EML MIME messages
- */
-export const renderBarcodeToCanvasPng = async (
-  date: string,
-  refNumber: string,
-  id?: string
-): Promise<string | null> => {
-  if (typeof document === 'undefined') return null;
-  try {
-    const canvas = document.createElement('canvas');
-    const upcCodeValue = buildUpcA12Digits(date, refNumber, id);
-    JsBarcode(canvas, upcCodeValue, {
-      format: 'UPC',
-      width: 1.5,
-      height: 32,
-      displayValue: true,
-      text: upcCodeValue,
-      fontSize: 10,
-      font: 'Arial, monospace',
-      margin: 2,
-      background: '#ffffff',
-      lineColor: '#0f172a',
-    });
-    return canvas.toDataURL('image/png');
-  } catch (err) {
-    console.warn('Barcode rendering to canvas failed for EML:', err);
-    return null;
-  }
-};
-
-/**
  * Builds a bulletproof HTML email body compatible with Microsoft Outlook 2013+ (Word rendering engine)
  * using cid: image references for embedded MIME attachments.
  */
@@ -302,7 +266,6 @@ export const buildEmailHtmlWithCids = (
     headerCid?: string;
     signatureCid?: string;
     stampCid?: string;
-    barcodeCid?: string;
   }
 ): string => {
   const { 
@@ -413,15 +376,10 @@ export const buildEmailHtmlWithCids = (
                 </tr>
               </table>
 
-              <!-- DATE & REF NUMBER ROW WITH BARCODE ABOVE -->
+              <!-- DATE & REF NUMBER ROW -->
               <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 24px;">
                 <tr>
                   <td align="left" valign="bottom" style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; color: #0f172a;">
-                    ${data.showBarcode !== false && attachments.barcodeCid ? `
-                      <div style="margin-bottom: 6px;">
-                        <img src="cid:${attachments.barcodeCid}" alt="Штрихкод" width="160" style="width: 160px; height: auto; display: block; border: 0;" />
-                      </div>
-                    ` : ''}
                     <div>
                       ${date ? `<span>${escapeHtml(date)}г.</span>` : ''}
                       ${refNumber ? `<span style="margin-left: 16px;">Исх. № ${escapeHtml(refNumber)}</span>` : ''}
@@ -576,7 +534,7 @@ export const generateEmlFileContentAsync = async (
   extraAttachments?: ExtraPdfAttachment[]
 ): Promise<string> => {
   const mimeAttachments: MimeImageAttachment[] = [];
-  const cidMap: { headerCid?: string; signatureCid?: string; stampCid?: string; barcodeCid?: string } = {};
+  const cidMap: { headerCid?: string; signatureCid?: string; stampCid?: string } = {};
 
   // 1. Process Header Image
   if (data.header.imageUrl) {
@@ -638,24 +596,6 @@ export const generateEmlFileContentAsync = async (
         mimeType: 'image/png',
         base64Data: stampPngBase64,
       });
-    }
-  }
-
-  // 3.5. Process Barcode Image
-  if (data.showBarcode !== false) {
-    const barcodePngDataUrl = await renderBarcodeToCanvasPng(data.date, data.refNumber, data.id);
-    if (barcodePngDataUrl && barcodePngDataUrl.startsWith('data:image/png;base64,')) {
-      const base64 = barcodePngDataUrl.split(',')[1];
-      if (base64) {
-        const cid = `barcode_img_${Date.now()}@teplomash.doc`;
-        cidMap.barcodeCid = cid;
-        mimeAttachments.push({
-          cid,
-          filename: 'barcode.png',
-          mimeType: 'image/png',
-          base64Data: base64,
-        });
-      }
     }
   }
 

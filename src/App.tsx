@@ -473,9 +473,6 @@ ${docData.signature.senderPosition} __________ ${docData.signature.senderName}
               <div>
                 <h1 className="text-sm font-bold tracking-tight text-[#111827] flex items-center gap-2">
                   Генератор Документов на Бланке
-                  <Badge variant="info" className="text-[10px] font-semibold py-0">
-                    ГОСТ Р 7.0.97–2025
-                  </Badge>
                 </h1>
                 <p className="text-[11px] text-[#6B7280]">Официальные письма, служебные записки и бланки АО «НПО «Тепломаш»</p>
               </div>

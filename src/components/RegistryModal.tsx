@@ -22,7 +22,10 @@ import {
   BarChart3,
   List,
   Copy,
-  ShieldCheck
+  ShieldCheck,
+  AlertOctagon,
+  ShieldAlert,
+  RotateCcw
 } from 'lucide-react';
 import { 
   RegisteredDocument, 
@@ -32,9 +35,12 @@ import {
   clearDocumentRegistryDb,
   verifyRegistryIntegrity,
   rechainRegistry,
-  fnv1a64Hex
+  fnv1a64Hex,
+  revokeDocumentInDb,
+  unrevokeDocumentInDb
 } from '../constants/departmentCodes';
 import { computeRegistryStats } from '../utils/registryStats';
+import { RevocationModal } from './RevocationModal';
 
 interface RegistryModalProps {
   isOpen: boolean;
@@ -42,6 +48,7 @@ interface RegistryModalProps {
   userRole?: 'admin' | 'user' | null;
   onRequestAdminAuth?: () => void;
   onOpenAsDraft?: (doc: RegisteredDocument) => void;
+  onSelectDocToCorrect?: (doc: RegisteredDocument) => void;
 }
 
 export const RegistryModal: React.FC<RegistryModalProps> = ({
@@ -49,7 +56,8 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
   onClose,
   userRole,
   onRequestAdminAuth,
-  onOpenAsDraft
+  onOpenAsDraft,
+  onSelectDocToCorrect
 }) => {
   const [registryList, setRegistryList] = useState<RegisteredDocument[]>([]);
   const [search, setSearch] = useState('');
@@ -60,6 +68,10 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
   const [deptFilter, setDeptFilter] = useState<string>('all');
   const [periodFilter, setPeriodFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
   const [viewMode, setViewMode] = useState<'list' | 'stats'>('list');
+
+  // Revocation Modal State
+  const [revokingDoc, setRevokingDoc] = useState<RegisteredDocument | null>(null);
+  const [isRevocationModalOpen, setIsRevocationModalOpen] = useState(false);
 
   const isAdmin = userRole === 'admin';
 
@@ -158,6 +170,49 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
     setStatusMsg({ type: 'success', text: `Изменения документа № ${editingDocData.regNumber} сохранены.` });
   };
 
+  const handleOpenRevokeModal = (doc: RegisteredDocument) => {
+    if (!isAdmin) {
+      if (onRequestAdminAuth) onRequestAdminAuth();
+      return;
+    }
+    setRevokingDoc(doc);
+    setIsRevocationModalOpen(true);
+  };
+
+  const handleRevokeConfirm = (docId: string, regNumber: string, reason: string, adminName: string) => {
+    const res = revokeDocumentInDb({
+      id: docId,
+      regNumber,
+      reason,
+      revokedBy: adminName
+    });
+
+    if (res.success) {
+      const updated = getDocumentRegistry();
+      setRegistryList(updated);
+      const verdict = verifyRegistryIntegrity(updated);
+      setChainStatus({ valid: verdict.valid, total: verdict.total, checked: true });
+      setStatusMsg({ type: 'success', text: `Документ № ${regNumber} успешно отозван. В реестре установлена отметка об аннулировании.` });
+    } else {
+      setStatusMsg({ type: 'error', text: res.error || 'Ошибка при отзыве документа.' });
+    }
+  };
+
+  const handleUnrevoke = (doc: RegisteredDocument) => {
+    if (!isAdmin) {
+      if (onRequestAdminAuth) onRequestAdminAuth();
+      return;
+    }
+    if (window.confirm(`Снять статус отзыва с документа № ${doc.regNumber} и восстановить его действие?`)) {
+      unrevokeDocumentInDb(doc.id);
+      const updated = getDocumentRegistry();
+      setRegistryList(updated);
+      const verdict = verifyRegistryIntegrity(updated);
+      setChainStatus({ valid: verdict.valid, total: verdict.total, checked: true });
+      setStatusMsg({ type: 'success', text: `Документ № ${doc.regNumber} восстановлен в Едином реестре.` });
+    }
+  };
+
   const handleExportCsv = () => {
     const rows = filteredDocs.map(doc => ({
       'Исходящий №': doc.regNumber,
@@ -217,7 +272,7 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
 <body>
   <button class="no-print" onclick="window.print()" style="position:fixed;top:12px;right:12px;padding:8px 16px;cursor:pointer;">Печать</button>
   <h1>Единый реестр исходящих писем</h1>
-  <div class="sub">АО «НПО «Тепломаш» · ГОСТ Р 7.0.97–2025 · Записей: ${filteredDocs.length}</div>
+  <div class="sub">АО «НПО «Тепломаш» · Записей: ${filteredDocs.length}</div>
   <table>
     <thead><tr><th>№</th><th>Дата</th><th>Отдел</th><th>Составитель</th><th>Адресат</th><th>Тема</th></tr></thead>
     <tbody>${rowsHtml}</tbody>
@@ -252,7 +307,7 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
                 </span>
               </h3>
               <p className="text-xs text-slate-300 mt-0.5">
-                Единая база исходящих документов АО «НПО «Тепломаш» (ГОСТ Р 7.0.97–2025)
+                Единая база исходящих документов АО «НПО «Тепломаш»
               </p>
             </div>
           </div>
@@ -668,10 +723,12 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
                     </div>
                   ) : (
                     /* Display Mode */
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 ${doc.isRevoked ? 'opacity-85' : ''}`}>
                       <div className="space-y-1.5 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="px-2.5 py-1 bg-indigo-950 text-indigo-100 font-mono font-bold text-xs rounded-md tracking-wider shadow-2xs">
+                          <span className={`px-2.5 py-1 font-mono font-bold text-xs rounded-md tracking-wider shadow-2xs ${
+                            doc.isRevoked ? 'bg-rose-950 text-rose-200 line-through' : 'bg-indigo-950 text-indigo-100'
+                          }`}>
                             № {doc.regNumber}
                           </span>
                           <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
@@ -681,6 +738,17 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
                           <span className="text-[11px] bg-indigo-50 text-indigo-800 font-semibold px-2 py-0.5 rounded border border-indigo-200">
                             {doc.deptName}
                           </span>
+                          {doc.isRevoked && (
+                            <span className="px-2 py-0.5 bg-rose-600 text-white font-extrabold text-[10px] rounded tracking-wide uppercase flex items-center gap-1">
+                              <AlertOctagon className="w-3 h-3" />
+                              ОТОЗВАНО
+                            </span>
+                          )}
+                          {doc.correctionsCount && doc.correctionsCount > 0 && !doc.isRevoked && (
+                            <span className="px-2 py-0.5 bg-indigo-100 text-indigo-900 border border-indigo-300 font-bold text-[10px] rounded" title={`Внесено заверенных правок: ${doc.correctionsCount}`}>
+                              ПРАВКИ ({doc.correctionsCount})
+                            </span>
+                          )}
                         </div>
 
                         <div className="text-xs text-slate-900 font-bold">
@@ -691,6 +759,32 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
                           <span>Составитель: <strong className="text-slate-800">{doc.composerName}</strong> ({doc.composerDept})</span>
                           <span>Адресат: <strong className="text-slate-800">{doc.recipientName}</strong></span>
                         </div>
+
+                        {/* Revocation Details Info Box */}
+                        {doc.isRevoked && (
+                          <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[10.5px] text-rose-950 space-y-0.5 mt-1">
+                            <div>
+                              <strong className="text-rose-800">Дата отзыва:</strong> {doc.revokedAt} | <strong className="text-rose-800">Кем:</strong> {doc.revokedBy || 'Администратор'}
+                            </div>
+                            {doc.revocationReason && (
+                              <div>
+                                <strong className="text-rose-800">Причина отзыва:</strong> {doc.revocationReason}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Correction summary info */}
+                        {doc.lastCorrectionReason && !doc.isRevoked && (
+                          <div className="p-2 bg-indigo-50/60 border border-indigo-200 rounded text-[10.5px] text-indigo-950 space-y-0.5 mt-1">
+                            <div>
+                              <strong className="text-indigo-900">Последние правки:</strong> {doc.lastCorrectedAt} (Заверено подписью)
+                            </div>
+                            <div className="text-slate-700">
+                              <strong>Основание:</strong> {doc.lastCorrectionReason}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {/* Right side info & Actions */}
@@ -712,7 +806,7 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
                             <button
                               type="button"
                               onClick={() => onOpenAsDraft(doc)}
-                              className="px-2.5 py-1 text-xs font-bold text-slate-600 bg-white hover:bg-indigo-50 rounded-lg transition-colors flex items-center gap-1 border border-slate-200"
+                              className="px-2.5 py-1 text-xs font-bold text-slate-600 bg-white hover:bg-indigo-50 rounded-lg transition-colors flex items-center gap-1 border border-slate-200 cursor-pointer"
                               title="Открыть копию как новый черновик (без изменения реестра)"
                             >
                               <Copy className="w-3.5 h-3.5" />
@@ -720,15 +814,38 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
                             </button>
                           )}
 
+                          {/* Admin Only: Revocation / Unrevoke button */}
                           {isAdmin && (
                             <>
+                              {!doc.isRevoked ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenRevokeModal(doc)}
+                                  className="px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                                  title="Отозвать опубликованное письмо (только администратор)"
+                                >
+                                  <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+                                  Отозвать
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleUnrevoke(doc)}
+                                  className="px-2.5 py-1 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                                  title="Восстановить отозванный документ"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+                                  Восстановить
+                                </button>
+                              )}
+
                               <button
                                 type="button"
                                 onClick={() => {
                                   setEditingDocId(doc.id);
                                   setEditingDocData({ ...doc });
                                 }}
-                                className="px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-1"
+                                className="px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                                 title="Редактировать запись"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
@@ -738,7 +855,7 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
                               <button
                                 type="button"
                                 onClick={() => handleDelete(doc.id, doc.regNumber)}
-                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                 title="Удалить из реестра"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -755,6 +872,16 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
           )}
         </div>
 
+        {/* Revocation Modal */}
+        <RevocationModal
+          isOpen={isRevocationModalOpen}
+          onClose={() => {
+            setIsRevocationModalOpen(false);
+            setRevokingDoc(null);
+          }}
+          document={revokingDoc}
+          onConfirmRevoke={handleRevokeConfirm}
+        />
       </div>
     </div>
   );

@@ -123,8 +123,18 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
           {/* ================= 3. DATE & REF NUMBER LINE (STRICT SANS-SERIF GOST STYLE) ================= */}
           <div className="flex items-end justify-between w-full border-b border-slate-300 pb-2 mb-8 text-xs text-slate-900 font-sans tracking-tight">
             <div className="space-y-1">
-              <div className="flex items-center gap-2 font-bold">
+              <div className="flex items-center gap-2 font-bold flex-wrap">
                 <span>Исх. № {effectiveRefNumber} от {cleanDate}г.</span>
+                {data.isRevoked && (
+                  <span className="px-2 py-0.5 bg-rose-600 text-white font-bold text-[9pt] rounded tracking-wide uppercase">
+                    ОТОЗВАНО
+                  </span>
+                )}
+                {data.corrections && data.corrections.length > 0 && !data.isRevoked && (
+                  <span className="px-2 py-0.5 bg-indigo-100 text-indigo-900 border border-indigo-300 font-bold text-[8.5pt] rounded tracking-tight">
+                    С ИСПРАВЛЕНИЯМИ ({data.corrections.length})
+                  </span>
+                )}
               </div>
               {inRefNumber && inRefNumber.trim() !== '' && (
                 <div className="text-[11px] text-slate-600 font-normal">{inRefNumber}</div>
@@ -136,6 +146,23 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
               </div>
             )}
           </div>
+
+          {/* REVOCATION WATERMARK / OFFICIAL NOTICE BANNER */}
+          {data.isRevoked && (
+            <div className="mb-6 p-3 bg-rose-50 border-2 border-rose-600 rounded-sm text-rose-950 font-sans text-[9pt] leading-tight space-y-1">
+              <div className="font-extrabold uppercase text-[10pt] text-rose-700 flex items-center gap-1.5">
+                <span>⛔ ДОКУМЕНТ ОТОЗВАН И УТРАТИЛ ЮРИДИЧЕСКУЮ СИЛУ</span>
+              </div>
+              <div className="text-slate-800">
+                <strong>Дата отзыва:</strong> {data.revokedAt || cleanDate} | <strong>Отозвано:</strong> {data.revokedBy || 'Администратор'}
+              </div>
+              {data.revocationReason && (
+                <div className="text-slate-900 pt-0.5">
+                  <strong>Причина отзыва:</strong> {data.revocationReason}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ================= 4. DOCUMENT TYPE & SUBJECT ("Тип (заголовок)") ================= */}
           <div className="text-center mb-8 space-y-1.5">
@@ -238,6 +265,59 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
             </div>
           </div>
         </div>
+
+        {/* ================= 7. SIGNED CORRECTIONS BLOCK ("Исправление заверено") ================= */}
+        {data.corrections && data.corrections.length > 0 && (
+          <div className="corrections-block mt-4 pt-3 border-t-2 border-dashed border-indigo-300 w-full relative z-10 shrink-0 bg-indigo-50/40 p-3 rounded space-y-2">
+            <div className="flex items-center justify-between text-indigo-950 font-bold text-[8.5pt] uppercase tracking-wide border-b border-indigo-200 pb-1">
+              <span>Официальная отметка о внесенных исправлениях (заверено подписью)</span>
+              <span className="font-mono text-[8pt] text-indigo-700 bg-indigo-100 px-1.5 py-0.2 rounded">
+                Записей: {data.corrections.length}
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              {data.corrections.map((corr, idx) => (
+                <div key={corr.id || idx} className="text-[8pt] font-sans text-slate-800 space-y-1 bg-white p-2 rounded border border-indigo-100 shadow-2xs">
+                  <div className="flex items-center justify-between flex-wrap gap-1 text-[7.5pt] text-slate-500">
+                    <span>Правка № {idx + 1} от <strong>{corr.timestamp}</strong></span>
+                    <span className="text-indigo-700 font-medium">Заверил: {corr.correctedByPosition ? `${corr.correctedByPosition} ` : ''}{corr.correctedBy}</span>
+                  </div>
+
+                  <div className="text-slate-900">
+                    <strong className="text-indigo-950">Причина правок:</strong> {corr.reason}
+                  </div>
+
+                  {corr.changesSummary && (
+                    <div className="text-slate-600 text-[7.5pt]">
+                      <strong>Суть исправлений:</strong> {corr.changesSummary}
+                    </div>
+                  )}
+
+                  {/* Signature attestation line / key */}
+                  <div className="pt-1 flex items-center justify-between border-t border-slate-100 text-[7pt]">
+                    <div className="flex items-center gap-1 text-emerald-800 font-semibold">
+                      <svg className="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Исправление заверено личной подписью: {corr.correctedBy}</span>
+                    </div>
+
+                    {corr.digitalSignatureKey ? (
+                      <span className="font-mono text-indigo-700 font-semibold bg-indigo-50 px-1 rounded">
+                        ЭП: {corr.digitalSignatureKey}
+                      </span>
+                    ) : corr.signatureImageUrl ? (
+                      <img src={corr.signatureImageUrl} alt="Подпись" className="max-h-5 object-contain" />
+                    ) : (
+                      <span className="italic text-slate-400 font-serif">(подпись)</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -62,7 +62,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold tracking-tight">Вход в систему</h3>
-              <p className="text-xs text-indigo-200">Генератор документов ГОСТ Р 7.0.97–2025</p>
+              <p className="text-xs text-indigo-200">Генератор официальных документов</p>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 leading-snug">
-                    Быстрый доступ к созданию, заполнению и печати всех документов по ГОСТ без регистрации.
+                    Быстрый доступ к созданию, заполнению и печати всех документов без регистрации.
                   </p>
                 </div>
               </button>

@@ -606,7 +606,7 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
                 <span>Электронная подпись (ЭП)</span>
               </div>
               <div className="text-[11px] text-slate-500 mt-0.5 leading-tight">
-                Официальный штамп с автоматически сгенерированным уникальным ключом ГОСТ
+                Официальный штамп с автоматически сгенерированным уникальным ключом
               </div>
             </div>
           </button>
@@ -619,10 +619,7 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
               <div className="border-b border-indigo-200 pb-1 font-bold text-indigo-900 flex items-center justify-between">
                 <span className="flex items-center gap-1.5 uppercase text-[11px] tracking-wide">
                   <ShieldCheck className="w-4 h-4 text-indigo-700" />
-                  🛡 ДОКУМЕНТ ПОДПИСАН ЭЛЕКТРОННОЙ ПОДПИСЬЮ (ГОСТ)
-                </span>
-                <span className="text-[10px] text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded font-mono">
-                  АВТОКЛЮЧ
+                  ДОКУМЕНТ ПОДПИСАН ЭЛЕКТРОННОЙ ПОДПИСЬЮ
                 </span>
               </div>
               <div className="space-y-1 text-[11px] text-slate-800 pt-0.5">

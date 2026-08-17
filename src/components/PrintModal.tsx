@@ -41,7 +41,7 @@ export const PrintModal: React.FC<PrintModalProps> = ({ isOpen, onClose, docData
             </div>
             <div>
               <h2 className="text-base font-bold tracking-tight">Печать документа (А4)</h2>
-              <p className="text-xs text-slate-300">Печать на бланке ГОСТ Р 7.0.97–2025</p>
+              <p className="text-xs text-slate-300">Печать на официальном бланке</p>
             </div>
           </div>
           <button

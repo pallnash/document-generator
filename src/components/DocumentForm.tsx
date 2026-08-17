@@ -22,8 +22,11 @@ import {
   clearDocumentRegistryDb,
   getDocumentRegistry,
   isRegistrationNumberTaken,
-  RegisteredDocument
+  RegisteredDocument,
+  recordCorrectionInRegistry
 } from '../constants/departmentCodes';
+import { CorrectionModal } from './CorrectionModal';
+import { DocumentCorrection } from '../types';
 import { 
   UserCheck, 
   FileText, 
@@ -150,6 +153,33 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
   const [notifyMsg, setNotifyMsg] = useState<string | null>(null);
   const [isPublishConfirmOpen, setIsPublishConfirmOpen] = useState<boolean>(false);
   const [publishWarnings, setPublishWarnings] = useState<string[]>([]);
+  const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState<boolean>(false);
+
+  const handleApplyCorrection = (correction: DocumentCorrection) => {
+    // 1. Append correction to document
+    const existingCorrections = data.corrections || [];
+    const updatedCorrections = [...existingCorrections, correction];
+    
+    const updatedDoc: DocumentData = {
+      ...data,
+      corrections: updatedCorrections
+    };
+    onChange(updatedDoc);
+
+    // 2. Update the document entry in the registry
+    if (data.refNumber) {
+      recordCorrectionInRegistry({
+        regNumber: data.refNumber,
+        reason: correction.reason,
+        correctedBy: correction.correctedBy,
+        timestamp: correction.timestamp
+      });
+      setRegistryList(getDocumentRegistry());
+    }
+
+    setNotifyMsg(`ИСПРАВЛЕНИЕ ЗАВЕРЕНО! Запись о внесенных правках прикреплена к документу № ${data.refNumber} и зафиксирована в реестре.`);
+    setTimeout(() => setNotifyMsg(null), 6000);
+  };
 
   // Search & autocomplete state for recipient selection from tmdata
   const [recipientSearchQuery, setRecipientSearchQuery] = useState<string>('');
@@ -254,7 +284,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
       }
     }
 
-    // Контроль полноты перед публикацией (ГОСТ: подпись + печать обязательны)
+    // Контроль полноты перед публикацией (подпись + печать обязательны)
     const warnings: string[] = [];
     const sig = data.signature;
     const hasGraphicSignature = sig.type === 'image' && !!sig.imageUrl || sig.type === 'canvas';
@@ -413,6 +443,16 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              onClick={() => setIsCorrectionModalOpen(true)}
+              className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+              title="Внести заверенные исправления в опубликованное письмо"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              <span>Внести исправление (с подписью)</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => {
                 const draftCopy: DocumentData = {
                   ...data,
@@ -423,7 +463,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
                 };
                 onChange(draftCopy);
               }}
-              className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+              className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
               title="Создать новую редактируемую копию на основе этого документа"
             >
               <Copy className="w-3.5 h-3.5" />
@@ -1418,7 +1458,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
           </div>
 
           <p className="text-[11px] text-slate-400">
-            Подсказка: разделяйте абзацы пустой строкой (двойной Enter). В предпросмотре ГОСТ абзацы автоматически оформляются красной строкой (отступом).
+            Подсказка: разделяйте абзацы пустой строкой (двойной Enter). В предпросмотре абзацы автоматически оформляются красной строкой (отступом).
           </p>
         </div>
       </div>

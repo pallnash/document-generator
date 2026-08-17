@@ -2,7 +2,7 @@
   "name": "generator-doc-gost",
   "private": true,
   "version": "1.0.0",
-  "description": "Генератор официальных документов и бланков по ГОСТ АО НПО Тепломаш",
+  "description": "Генератор официальных документов и бланков АО НПО Тепломаш",
   "author": "АО НПО Тепломаш",
   "type": "module",
   "main": "main.cjs",
