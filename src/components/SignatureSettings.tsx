@@ -1,9 +1,9 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { SignatureConfig, SavedSignatureItem, DocumentData } from '../types';
 import { SignatureCanvasModal } from './SignatureCanvasModal';
-import { SAMPLE_STAMPS, getInitialBlankDocument } from '../constants/presets';
+import { getInitialBlankDocument } from '../constants/presets';
 import { TEPLOMASH_EMPLOYEES, TeplomashEmployee } from '../constants/teplomashEmployees';
-import { buildStampSvg, downloadSvgFile, generateDigitalSignatureKey } from '../utils/stampUtils';
+import { generateDigitalSignatureKey } from '../utils/stampUtils';
 import { validateDocument } from '../utils/validationUtils';
 import { 
   registerDocumentInDb, 
@@ -26,13 +26,12 @@ import {
   Check, 
   FolderHeart, 
   Sparkles, 
-  Download,
-  Send,
-  Zap,
-  AlertTriangle,
-  ShieldAlert,
-  Lock,
-  Search
+  Send, 
+  Zap, 
+  AlertTriangle, 
+  ShieldAlert, 
+  Lock, 
+  Search 
 } from 'lucide-react';
 
 const SAVED_SIGNATURES_KEY = 'doc_gen_saved_signatures_v2';
@@ -81,29 +80,9 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
 }) => {
   const employeeList = employees || [];
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const stampInputRef = useRef<HTMLInputElement>(null);
   const [isCanvasOpen, setIsCanvasOpen] = useState(false);
-  const [showStampEditor, setShowStampEditor] = useState(false);
   const [senderSearchQuery, setSenderSearchQuery] = useState('');
   const [isSenderDropdownOpen, setIsSenderDropdownOpen] = useState(false);
-
-  // Custom stamp form states
-  const [stampOrg, setStampOrg] = useState('АКЦИОНЕРНОЕ ОБЩЕСТВО «НПО «ТЕПЛОМАШ»');
-  const [stampCityOgrn, setStampCityOgrn] = useState('САНКТ-ПЕТЕРБУРГ * ОГРН 1027809212573');
-  const [stampDepartment, setStampDepartment] = useState(signature.senderDepartment || 'Бюро автоматики');
-  const [stampPosition, setStampPosition] = useState(signature.senderPosition || 'Ведущий инженер-программист');
-  const [stampCenterSub, setStampCenterSub] = useState('ДЛЯ ДОКУМЕНТОВ');
-  const [stampColor, setStampColor] = useState('#1d4ed8');
-
-  // Auto-sync stamp department & position when sender info is updated from employee selector
-  useEffect(() => {
-    if (signature.senderDepartment) {
-      setStampDepartment(signature.senderDepartment);
-    }
-    if (signature.senderPosition) {
-      setStampPosition(signature.senderPosition);
-    }
-  }, [signature.senderDepartment, signature.senderPosition]);
 
   const filteredSenderEmployees = useMemo(() => {
     const q = senderSearchQuery.trim().toLowerCase();
@@ -115,23 +94,13 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
   }, [employeeList, senderSearchQuery]);
 
   const handleSelectSender = (emp: TeplomashEmployee) => {
-    const stampSvg = buildStampSvg(
-      stampOrg,
-      stampCityOgrn,
-      emp.department,
-      emp.position,
-      stampCenterSub,
-      stampColor
-    );
     onChange({
       ...signature,
       senderPosition: emp.position,
       senderDepartment: emp.department,
       senderOrganization: emp.organization,
       senderName: emp.shortName,
-      senderEmail: emp.email,
-      showStamp: true,
-      stampImageUrl: stampSvg
+      senderEmail: emp.email
     });
     setSenderSearchQuery('');
     setIsSenderDropdownOpen(false);
@@ -316,15 +285,6 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
     });
   };
 
-  const handleApplyCustomStamp = () => {
-    const customSvg = buildStampSvg(stampOrg, stampCityOgrn, stampDepartment, stampPosition, stampCenterSub, stampColor);
-    onChange({
-      ...signature,
-      showStamp: true,
-      stampImageUrl: customSvg
-    });
-  };
-
   const handleSignatureImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -336,23 +296,6 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
             ...signature,
             type: 'image',
             imageUrl: uploadedUrl
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleStampUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        if (evt.target?.result) {
-          onChange({
-            ...signature,
-            showStamp: true,
-            stampImageUrl: evt.target.result as string
           });
         }
       };

@@ -16,12 +16,10 @@ import { triggerSystemPrint } from './utils/printUtils';
 import { validateDocument, ValidationError } from './utils/validationUtils';
 import { ValidationModal } from './components/ValidationModal';
 import { TeplomashEmployee, TEPLOMASH_EMPLOYEES, sanitizeEmployeeDepartments } from './constants/teplomashEmployees';
-import { SAMPLE_STAMPS } from './constants/presets';
 import { useMicroserviceBridge } from './hooks/useMicroserviceBridge';
 import { useDebouncedValue } from './hooks/useDebouncedValue';
 import { readRole, writeRole, clearRole } from './utils/authUtils';
 import { microserviceBridge } from './services/microserviceBridge';
-import { buildStampSvg } from './utils/stampUtils';
 import { downloadDocumentAsEml } from './utils/emlUtils';
 import { 
   guessDepartmentCode, 
@@ -177,15 +175,6 @@ export default function App() {
   };
 
   const handleApplyEmployeeSender = (emp: TeplomashEmployee) => {
-    const stampSvg = buildStampSvg(
-      'АКЦИОНЕРНОЕ ОБЩЕСТВО «НПО «ТЕПЛОМАШ»',
-      'САНКТ-ПЕТЕРБУРГ * ОГРН 1027809212573',
-      emp.department,
-      emp.position,
-      'ДЛЯ ДОКУМЕНТОВ',
-      '#1d4ed8'
-    );
-
     const deptCode = guessDepartmentCode(emp.department, emp.position);
     const seq = getNextDepartmentSeq(deptCode);
     const newRefNumber = generateDocumentNumber(docData.date, seq, deptCode);
@@ -199,9 +188,7 @@ export default function App() {
         senderDepartment: emp.department,
         senderOrganization: emp.organization,
         senderName: emp.shortName,
-        senderEmail: emp.email,
-        showStamp: false,
-        stampImageUrl: null
+        senderEmail: emp.email
       }
     }));
   };

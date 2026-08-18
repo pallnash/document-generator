@@ -1,38 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" width="1200" height="240">
-  <rect width="1200" height="240" fill="#ffffff"/>
-  <g transform="translate(10, 5)">
-    <g transform="translate(0, 5)">
-      <path d="M 22,0 L 44,32 L 35,32 L 35,105 L 9,105 L 9,32 L 0,32 Z" fill="#111827"/>
-      <path d="M 22,20 L 36,44 L 29,44 L 29,98 L 15,98 L 15,44 L 8,44 Z" fill="#ffffff"/>
-      <path d="M 22,38 L 30,56 L 25,56 L 25,92 L 19,98 L 19,56 L 14,56 Z" fill="#111827"/>
-      <path d="M 54,0 L 76,32 L 67,32 L 67,105 L 41,105 L 41,32 L 32,32 Z" fill="#111827"/>
-      <path d="M 54,20 L 68,44 L 61,44 L 61,98 L 47,98 L 47,44 L 40,44 Z" fill="#ffffff"/>
-      <path d="M 54,38 L 62,56 L 57,56 L 57,92 L 51,98 L 51,56 L 46,56 Z" fill="#111827"/>
-      <path d="M 86,0 L 108,32 L 99,32 L 99,105 L 73,105 L 73,32 L 64,32 Z" fill="#111827"/>
-      <path d="M 86,20 L 100,44 L 93,44 L 93,98 L 79,98 L 79,44 L 72,44 Z" fill="#ffffff"/>
-      <path d="M 86,38 L 94,56 L 89,56 L 89,92 L 83,98 L 83,56 L 78,56 Z" fill="#111827"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 195" width="1000" height="195">
+  <rect width="1000" height="195" fill="#ffffff"/>
+  
+  <!-- LOGO GROUP -->
+  <g transform="translate(8, 6)">
+    <!-- LEFT ARROW -->
+    <!-- Top upward chevron (outlined) -->
+    <path d="M 14,14 L 28,38 L 22,38 L 14,24 L 6,38 L 0,38 Z" fill="#111827"/>
+    <polygon points="14,19 23,35 19,35 14,26 9,35 5,35" fill="#ffffff"/>
+    <!-- Stem and bottom arrow (filled) -->
+    <path d="M 10,38 L 18,38 L 18,72 L 28,72 L 14,94 L 0,72 L 10,72 Z" fill="#111827"/>
+
+    <!-- CENTER ARROW (taller top and bottom) -->
+    <!-- Top upward chevron (outlined) -->
+    <path d="M 42,0 L 56,24 L 50,24 L 42,10 L 34,24 L 28,24 Z" fill="#111827"/>
+    <polygon points="42,5 51,21 47,21 42,12 37,21 33,21" fill="#ffffff"/>
+    <!-- Stem and bottom arrow (filled) -->
+    <path d="M 38,24 L 46,24 L 46,86 L 56,86 L 42,108 L 28,86 L 38,86 Z" fill="#111827"/>
+
+    <!-- RIGHT ARROW -->
+    <!-- Top upward chevron (outlined) -->
+    <path d="M 70,14 L 84,38 L 78,38 L 70,24 L 62,38 L 56,38 Z" fill="#111827"/>
+    <polygon points="70,19 79,35 75,35 70,26 65,35 61,35" fill="#ffffff"/>
+    <!-- Stem and bottom arrow (filled) -->
+    <path d="M 66,38 L 74,38 L 74,72 L 84,72 L 70,94 L 56,72 L 66,72 Z" fill="#111827"/>
+
+    <!-- "Тепломаш" WORDMARK -->
+    <!-- Large corporate logotype positioned cleanly with no overlap -->
+    <g transform="translate(108, 0)">
+      <text x="0" y="80" font-family="'Arial Black', 'Trebuchet MS', 'Arial', sans-serif" font-weight="900" font-size="82" fill="#111827" letter-spacing="-1.5">Тепломаш</text>
+      <!-- Registered Trademark Symbol ® -->
+      <g transform="translate(460, 26)">
+        <circle cx="8" cy="8" r="7.5" fill="none" stroke="#111827" stroke-width="1.2"/>
+        <text x="8" y="11.5" font-family="Arial, sans-serif" font-weight="bold" font-size="10.5" fill="#111827" text-anchor="middle">R</text>
+      </g>
     </g>
-    <text x="122" y="78" font-family="'Arial Black', Arial, sans-serif" font-weight="900" font-size="80" fill="#111827" letter-spacing="-1">Тепломаш</text>
-    <text x="698" y="32" font-family="Arial, sans-serif" font-size="20" fill="#111827">®</text>
   </g>
-  <g transform="translate(10, 122)">
-    <text x="0" y="0" font-family="Arial, sans-serif" font-weight="bold" font-size="15" fill="#111827">Акционерное общество</text>
-    <text x="0" y="18" font-family="Arial, sans-serif" font-weight="bold" font-size="15" fill="#111827">«Научно-производственное объединение «Тепломаш»</text>
-    <text x="0" y="35" font-family="Arial, sans-serif" font-size="14" fill="#111827">АО «НПО «Тепломаш»</text>
-    <text x="0" y="51" font-family="Arial, sans-serif" font-size="14" fill="#111827">ИНН 7806112986, КПП 780601001, ОГРН 1027809212573</text>
-    <text x="0" y="67" font-family="Arial, sans-serif" font-size="14" fill="#111827">р/с 40702810055130177203</text>
-    <text x="0" y="83" font-family="Arial, sans-serif" font-size="14" fill="#111827">Северо-Западный Банк ПАО «Сбербанк» г. Санкт-Петербург</text>
-    <text x="0" y="99" font-family="Arial, sans-serif" font-size="14" fill="#111827">к/с 30101810500000000653 БИК 044030653</text>
+
+  <!-- LEFT COLUMN: Requisites -->
+  <g transform="translate(8, 114)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-weight="bold" font-size="12.5" fill="#111827">Акционерное общество</text>
+    <text x="0" y="15" font-family="Arial, sans-serif" font-weight="bold" font-size="12.5" fill="#111827">«Научно-производственное объединение «Тепломаш»</text>
+    <text x="0" y="29" font-family="Arial, sans-serif" font-size="12" fill="#111827">АО «НПО «Тепломаш»</text>
+    <text x="0" y="43" font-family="Arial, sans-serif" font-size="12" fill="#111827">ИНН 7806112986, КПП 780601001, ОГРН 1027809212573</text>
+    <text x="0" y="57" font-family="Arial, sans-serif" font-size="12" fill="#111827">р/с 40702810055130177203</text>
+    <text x="0" y="71" font-family="Arial, sans-serif" font-size="12" fill="#111827">Северо-Западный Банк ПАО «Сбербанк» г. Санкт-Петербург</text>
+    <text x="0" y="85" font-family="Arial, sans-serif" font-size="12" fill="#111827">к/с 30101810500000000653  БИК 044030653</text>
   </g>
-  <g transform="translate(1190, 42)" text-anchor="end">
-    <text x="0" y="0" font-family="Arial, sans-serif" font-size="15" fill="#111827">Адрес: 195279, Санкт-Петербург,</text>
-    <text x="0" y="18" font-family="Arial, sans-serif" font-size="15" fill="#111827">шоссе Революции, д.90, л.А</text>
-    <text x="0" y="38" font-family="Arial, sans-serif" font-size="15" fill="#111827">тел. +7 (812) <tspan font-weight="bold">301-99-40</tspan></text>
-    <text x="0" y="56" font-family="Arial, sans-serif" font-size="15" fill="#111827">тел./факс +7 (812) <tspan font-weight="bold">327-63-82</tspan></text>
-    <text x="0" y="100" font-family="Arial, sans-serif" font-style="italic" font-size="15" fill="#111827">root@teplomash.ru</text>
-    <text x="0" y="118" font-family="Arial, sans-serif" font-style="italic" font-size="15" fill="#111827">www.teplomash.ru</text>
+
+  <!-- RIGHT COLUMN: Contacts (Right Aligned) -->
+  <g transform="translate(992, 40)" text-anchor="end">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="13" fill="#111827">Адрес: 195279, Санкт-Петербург,</text>
+    <text x="0" y="16" font-family="Arial, sans-serif" font-size="13" fill="#111827">шоссе Революции, д.90, л.А</text>
+    <text x="0" y="34" font-family="Arial, sans-serif" font-size="13" fill="#111827">тел. +7 (812) <tspan font-weight="bold" font-style="italic">301-99-40</tspan></text>
+    <text x="0" y="50" font-family="Arial, sans-serif" font-size="13" fill="#111827">тел./факс +7 (812) <tspan font-weight="bold" font-style="italic">327-63-82</tspan></text>
+    
+    <text x="0" y="86" font-family="Arial, sans-serif" font-style="italic" font-size="13" fill="#111827">root@teplomash.ru</text>
+    <text x="0" y="102" font-family="Arial, sans-serif" font-style="italic" font-size="13" fill="#111827">www.teplomash.ru</text>
   </g>
-  <line x1="0" y1="230" x2="1200" y2="230" stroke="#111827" stroke-width="3"/>
-  <line x1="0" y1="234" x2="1200" y2="234" stroke="#111827" stroke-width="1"/>
+
+  <!-- BOTTOM DOUBLE LINE -->
+  <line x1="0" y1="188" x2="1000" y2="188" stroke="#111827" stroke-width="2.5"/>
+  <line x1="0" y1="192" x2="1000" y2="192" stroke="#111827" stroke-width="1"/>
 </svg>

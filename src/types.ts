@@ -31,8 +31,8 @@ export interface SignatureConfig {
   senderOrganization: string; // e.g. "АО «НПО «Тепломаш»"
   senderName: string; // e.g. "А.В. Смирнов"
   senderEmail?: string; // e.g. "romanov@teplomash.ru"
-  showStamp: boolean;
-  stampImageUrl: string | null;
+  showStamp?: boolean;
+  stampImageUrl?: string | null;
   // Electronic Digital Signature (ЭП / ЭЦП)
   useDigitalSignature?: boolean;
   digitalSignatureKey?: string;

@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { DocumentData } from '../types';
 import { downloadDocumentAsEml } from '../utils/emlUtils';
-import { downloadSvgFile } from '../utils/stampUtils';
 import { 
   X, 
-  Download, 
   Mail, 
   CheckCircle2, 
   AlertCircle,
@@ -62,7 +60,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, docDa
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -94,27 +92,27 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, docDa
 
           {/* Status and Error Messages */}
           {statusMessage && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-2.5 rounded-lg text-xs flex items-center gap-2 animate-in fade-in">
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3.5 py-2.5 rounded-lg text-xs flex items-center gap-2 animate-in fade-in">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{statusMessage}</span>
             </div>
           )}
 
           {errorMessage && (
-            <div className="bg-red-50 border border-red-200 text-red-800 px-3 py-2.5 rounded-lg text-xs flex items-center gap-2 animate-in fade-in">
+            <div className="bg-red-50 border border-red-200 text-red-800 px-3.5 py-2.5 rounded-lg text-xs flex items-center gap-2 animate-in fade-in">
               <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {/* Info Banner */}
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text.xs text-slate-600 space-y-1">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 space-y-1">
             <div className="font-semibold text-slate-800 flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
               <span>Экспорт почтового файла:</span>
             </div>
-            <p className="text-xs text-slate-500">
-              Файл .EML открывается в любом почтовом клиенте (Outlook, Thunderbird) как готовое черновик-сообщение с форматированным текстом документа, фирменной шапкой и печатью.
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Файл .EML открывается в любом почтовом клиенте (Outlook, Thunderbird) как готовое черновик-сообщение с форматированным текстом документа, фирменной шапкой и реквизитами.
             </p>
           </div>
         </div>
@@ -125,41 +123,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose, docDa
             type="button"
             onClick={onClose}
             disabled={isProcessing}
-            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
           >
             Закрыть
           </button>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Download SVG Stamp/Header Button */}
-            {(docData.header.imageUrl || docData.signature.stampImageUrl) && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (docData.signature.stampImageUrl) {
-                    downloadSvgFile(docData.signature.stampImageUrl, 'pechat-teplomash.svg');
-                  }
-                  if (docData.header.imageUrl && docData.header.imageUrl.includes('svg')) {
-                    downloadSvgFile(docData.header.imageUrl, 'shapka-teplomash.svg');
-                  }
-                  setStatusMessage('Файлы .SVG успешно сохранены!');
-                  setTimeout(() => setStatusMessage(null), 2500);
-                }}
-                disabled={isProcessing}
-                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all border border-slate-300"
-                title="Скачать элементы (шапку и печать) в векторе (.svg)"
-              >
-                <Download className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Скачать .SVG</span>
-              </button>
-            )}
-
             {/* EML Button */}
             <button
               type="button"
               onClick={handleExportEml}
               disabled={isProcessing}
-              className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white rounded-lg text-xs font-semibold flex items-center gap-2 transition-all shadow-xs"
+              className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white rounded-lg text-xs font-semibold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
             >
               <Mail className="w-4 h-4" />
               <span>{isProcessing ? 'Обработка...' : 'Экспорт в .EML'}</span>

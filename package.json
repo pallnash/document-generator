@@ -40,10 +40,14 @@
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "html2canvas": "^1.4.1",
     "jsbarcode": "^3.12.3",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.546.0",
+    "pdfjs-dist": "^6.2.108",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "sharp": "^0.35.3",
     "vite": "^6.2.3"
   },
   "devDependencies": {

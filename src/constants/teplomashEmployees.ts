@@ -19,4 +19,29 @@ export function sanitizeEmployeeDepartments(employees: TeplomashEmployee[]): Tep
   }));
 }
 
-export const TEPLOMASH_EMPLOYEES: TeplomashEmployee[] = [];
+export const TEPLOMASH_EMPLOYEES: TeplomashEmployee[] = [
+  {
+    id: 'emp-tt-head',
+    fullName: 'Иванов Алексей Сергеевич',
+    shortName: 'Иванов А.С.',
+    dativeName: 'Иванову Алексею Сергеевичу',
+    position: 'Начальник отдела цифровых технологий и автоматизации',
+    dativePosition: 'Начальнику отдела цифровых технологий и автоматизации',
+    department: 'Отдел цифровых технологий и автоматизации',
+    organization: 'АО «НПО «Тепломаш»',
+    email: 'ivanov.as@teplomash.ru',
+    phone: '301-99-40 (доб. 241)'
+  },
+  {
+    id: 'emp-tt-dev',
+    fullName: 'Козлов Дмитрий Павлович',
+    shortName: 'Козлов Д.П.',
+    dativeName: 'Козлову Дмитрию Павловичу',
+    position: 'Программист приложений',
+    dativePosition: 'Программисту приложений',
+    department: 'Отдел цифровых технологий и автоматизации',
+    organization: 'АО «НПО «Тепломаш»',
+    email: 'kozlov.dp@teplomash.ru',
+    phone: '301-99-40 (доб. 242)'
+  }
+];

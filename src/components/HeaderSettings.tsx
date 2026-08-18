@@ -3,6 +3,7 @@ import { HeaderConfig } from '../types';
 import { SAMPLE_HEADERS } from '../constants/presets';
 import { Upload, Image as ImageIcon, Trash2, AlignLeft, AlignCenter, AlignRight, Maximize2, Sparkles, AlertCircle, Shield, KeyRound, Lock, Download } from 'lucide-react';
 import { downloadSvgFile } from '../utils/stampUtils';
+import { PdfHeaderRenderer } from './PdfHeaderRenderer';
 
 interface HeaderSettingsProps {
   header: HeaderConfig;
@@ -117,8 +118,8 @@ export const HeaderSettings: React.FC<HeaderSettingsProps> = ({
         {header.imageUrl ? (
           <div className="relative border border-slate-200 rounded p-3 bg-slate-50 group hover:border-slate-300 transition-colors">
             <div className="h-28 flex items-center justify-center overflow-hidden rounded bg-white border border-slate-200 p-2">
-              <img 
-                src={header.imageUrl} 
+              <PdfHeaderRenderer 
+                url={header.imageUrl} 
                 alt="Шапка бланка" 
                 className="max-h-full max-w-full object-contain"
               />
@@ -173,7 +174,7 @@ export const HeaderSettings: React.FC<HeaderSettingsProps> = ({
               {isAdmin ? 'Нажмите для загрузки картинки шапки' : 'Загрузка логотипа недоступна обычным пользователям'}
             </p>
             <p className="text-[11px] text-slate-500 mt-1">
-              {isAdmin ? 'Поддерживаются PNG, JPG, WebP, SVG (до 5 МБ)' : 'Для загрузки собственного бланка авторизуйтесь под администратором'}
+              {isAdmin ? 'Поддерживаются PDF, PNG, JPG, WebP, SVG (до 5 МБ)' : 'Для загрузки собственного бланка авторизуйтесь под администратором'}
             </p>
           </div>
         )}
@@ -182,7 +183,7 @@ export const HeaderSettings: React.FC<HeaderSettingsProps> = ({
           <input 
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,application/pdf,.pdf"
             onChange={handleImageUpload}
             className="hidden"
           />

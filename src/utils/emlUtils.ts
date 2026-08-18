@@ -1,5 +1,4 @@
 import { DocumentData } from '../types';
-import { buildStampSvg, renderStampToCanvasPng } from './stampUtils';
 import { TEPLOMASH_EMPLOYEES, TeplomashEmployee } from '../constants/teplomashEmployees';
 import { sanitizeHtml } from './sanitizeUtils';
 
@@ -455,20 +454,6 @@ export const buildEmailHtmlWithCids = (
                     <div style="font-weight: bold; position: relative; z-index: 10;">
                       ${escapeHtml(signature.senderName || 'Ф.И.О.')}
                     </div>
-
-                    ${signature.showStamp && attachments.stampCid ? `
-                      <!-- VML Overlapping Round Seal Stamp for Microsoft Outlook (Word Engine) -->
-                      <!--[if mso]>
-                      <v:image xmlns:v="urn:schemas-microsoft-microsoft-com:vml" src="cid:${attachments.stampCid}" style="position:absolute; width:135px; height:135px; top:-40px; right:-15px; z-index:5;" />
-                      <![endif]-->
-                      
-                      <!-- Overlapping Round Seal Stamp for Thunderbird, Apple Mail, Gmail, Webmail -->
-                      <!--[if !mso]><!-->
-                      <div style="position: relative; margin-top: -50px; margin-right: -10px; text-align: right; z-index: 5; pointer-events: none;">
-                        <img src="cid:${attachments.stampCid}" alt="Печать" width="135" height="135" style="width: 135px; height: 135px; border-radius: 50%; opacity: 0.88; mix-blend-multiply; display: inline-block; border: 0;" />
-                      </div>
-                      <!--<![endif]-->
-                    ` : ''}
                   </td>
                 </tr>
               </table>
@@ -562,39 +547,6 @@ export const generateEmlFileContentAsync = async (
         filename: 'signature.png',
         mimeType: sigPng.mimeType,
         base64Data: sigPng.base64,
-      });
-    }
-  }
-
-  // 3. Process Stamp / Seal Image -> Render crisp PNG via 2D Canvas before saving to .EML
-  if (data.signature.showStamp) {
-    let stampPngBase64 = '';
-
-    // Render high-resolution round seal PNG using 2D canvas
-    const renderedPng = renderStampToCanvasPng(
-      data.signature.senderOrganization || 'АО «НПО «ТЕПЛОМАШ»',
-      'САНКТ-ПЕТЕРБУРГ * ОГРН 1027809212573',
-      data.signature.senderDepartment || 'ОТДЕЛ ПРОДАЖ',
-      data.signature.senderPosition || 'Сотрудник',
-      'ДЛЯ ДОКУМЕНТОВ',
-      '#1d4ed8'
-    );
-
-    if (renderedPng && renderedPng.startsWith('data:image/png;base64,')) {
-      stampPngBase64 = renderedPng.split(',')[1];
-    } else if (data.signature.stampImageUrl) {
-      const converted = await convertImageUrlToPngBase64(data.signature.stampImageUrl, 280, 280);
-      if (converted) stampPngBase64 = converted.base64;
-    }
-
-    if (stampPngBase64) {
-      const cid = `stamp_img_${Date.now()}@teplomash.doc`;
-      cidMap.stampCid = cid;
-      mimeAttachments.push({
-        cid,
-        filename: 'stamp.png',
-        mimeType: 'image/png',
-        base64Data: stampPngBase64,
       });
     }
   }

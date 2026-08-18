@@ -1,8 +1,8 @@
 import React from 'react';
 import { DocumentData } from '../types';
-import { buildStampSvg, renderStampToCanvasPng } from '../utils/stampUtils';
 import { generateDocumentNumber, guessDepartmentCode, getNextDepartmentSeq } from '../constants/departmentCodes';
 import { sanitizeHtml } from '../utils/sanitizeUtils';
+import { PdfHeaderRenderer } from './PdfHeaderRenderer';
 
 interface DocumentPreviewProps {
   data: DocumentData;
@@ -69,13 +69,9 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
                   style={{ marginBottom: `${header.marginBottom}px` }}
                 >
                   <div className={`flex ${getHeaderAlignClass()} w-full`}>
-                    <img
-                      src={header.imageUrl}
+                    <PdfHeaderRenderer
+                      url={header.imageUrl}
                       alt="Фирменный бланк организации"
-                      style={{
-                        width: '100%',
-                        height: 'auto'
-                      }}
                       className="w-full h-auto object-contain transition-all block"
                     />
                   </div>
