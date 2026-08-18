@@ -1,7 +1,9 @@
 import { DocumentData } from '../types';
+import { TEPLOMASH_HEADER_PNG_DATA_URL } from './teplomashHeaderPng';
 
 // Official Teplomash Header Image (Exact replica of Corporate Letterhead)
-export const TEPLOMASH_OFFICIAL_HEADER_URL = '/teplomash-header.png';
+// ЗАХАРДКОЖЕНО: PNG-бланк встроен как data-URL — не зависит от файлов public/ и сети.
+export const TEPLOMASH_OFFICIAL_HEADER_URL = TEPLOMASH_HEADER_PNG_DATA_URL;
 
 export const SAMPLE_HEADERS = [
   {

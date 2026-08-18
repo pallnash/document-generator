@@ -134,7 +134,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
 
           {/* ================= 2. RECIPIENT BLOCK ("Кому") ================= */}
           <div className="flex justify-end w-full mb-6">
-            <div className="w-[48%] text-left space-y-0.5 text-slate-900 leading-snug font-sans" style={{ fontSize: `${fontSize - 1}pt` }}>
+            <div className="w-[48%] text-right space-y-0.5 text-slate-900 leading-snug font-sans" style={{ fontSize: '11pt' }}>
               {recipient.position && (
                 <div className="whitespace-pre-line font-normal">{recipient.position}</div>
               )}
@@ -269,10 +269,10 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
             {content ? (
               <div 
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
-                className="[&_p]:mb-3 [&_p]:indent-6 [&_p]:break-words [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-8 [&_ol]:list-decimal [&_ol]:pl-8 [&_strong]:font-bold"
+                className="[&_p]:mb-3 [&_p]:break-words [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-8 [&_ol]:list-decimal [&_ol]:pl-8 [&_strong]:font-bold"
               />
             ) : (
-              <p className="italic text-slate-400 indent-6">
+              <p className="italic text-slate-400">
                 (Текст документа появится здесь по мере ввода в левой панели...)
               </p>
             )}
