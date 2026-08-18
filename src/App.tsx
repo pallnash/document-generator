@@ -352,10 +352,14 @@ export default function App() {
     setDocData({
       ...INITIAL_DOCUMENT,
       id: `doc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      date: new Date().toLocaleDateString('ru-RU'),
+      date: doc.date || new Date().toLocaleDateString('ru-RU'),
       refNumber: doc.regNumber,
       docSubject: doc.subject,
-      isPublished: false,
+      isPublished: true,
+      isRevoked: Boolean(doc.isRevoked),
+      revokedAt: doc.revokedAt,
+      revokedBy: doc.revokedBy,
+      revocationReason: doc.revocationReason,
       recipient: {
         ...INITIAL_DOCUMENT.recipient,
         name: doc.recipientName,

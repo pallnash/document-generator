@@ -806,11 +806,15 @@ export const RegistryModal: React.FC<RegistryModalProps> = ({
                             <button
                               type="button"
                               onClick={() => onOpenAsDraft(doc)}
-                              className="px-2.5 py-1 text-xs font-bold text-slate-600 bg-white hover:bg-indigo-50 rounded-lg transition-colors flex items-center gap-1 border border-slate-200 cursor-pointer"
-                              title="Открыть копию как новый черновик (без изменения реестра)"
+                              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 border cursor-pointer ${
+                                doc.isRevoked
+                                  ? 'text-red-700 bg-red-50 hover:bg-red-100 border-red-200 shadow-2xs'
+                                  : 'text-slate-600 bg-white hover:bg-indigo-50 border-slate-200'
+                              }`}
+                              title={doc.isRevoked ? "Открыть письмо (будет проставлен красный штамп АННУЛИРОВАНО)" : "Открыть копию как новый черновик"}
                             >
                               <Copy className="w-3.5 h-3.5" />
-                              Черновик
+                              {doc.isRevoked ? 'Открыть' : 'Черновик'}
                             </button>
                           )}
 

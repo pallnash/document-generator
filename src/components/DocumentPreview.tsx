@@ -1,6 +1,6 @@
 import React from 'react';
 import { DocumentData } from '../types';
-import { generateDocumentNumber, guessDepartmentCode, getNextDepartmentSeq } from '../constants/departmentCodes';
+import { generateDocumentNumber, guessDepartmentCode, getNextDepartmentSeq, getDocumentRegistry } from '../constants/departmentCodes';
 import { sanitizeHtml } from '../utils/sanitizeUtils';
 import { PdfHeaderRenderer } from './PdfHeaderRenderer';
 
@@ -22,6 +22,26 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
     .trim()
     .replace(/г\.?$/i, '')
     .trim();
+
+  // Check effective revocation status by either document state or matching registry record with same outgoing refNumber
+  const registry = React.useMemo(() => {
+    try {
+      return getDocumentRegistry();
+    } catch {
+      return [];
+    }
+  }, [effectiveRefNumber, data.isRevoked, data.updatedAt]);
+
+  const matchingRecord = React.useMemo(() => {
+    if (!effectiveRefNumber) return undefined;
+    const cleanNum = effectiveRefNumber.trim().toUpperCase();
+    return registry.find(r => r.regNumber && r.regNumber.trim().toUpperCase() === cleanNum);
+  }, [registry, effectiveRefNumber]);
+
+  const isEffectivelyRevoked = Boolean(data.isRevoked || matchingRecord?.isRevoked);
+  const effectiveRevokedAt = data.revokedAt || matchingRecord?.revokedAt || cleanDate;
+  const effectiveRevokedBy = data.revokedBy || matchingRecord?.revokedBy || 'Администратор';
+  const effectiveRevocationReason = data.revocationReason || matchingRecord?.revocationReason;
 
   // Compute font family CSS value
   const fontStyle = {
@@ -59,7 +79,24 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
         }}
         className="w-[210mm] min-h-[297mm] bg-white text-slate-900 shadow-xl print:shadow-none print:w-[210mm] print:h-[297mm] print:m-0 rounded-xs transition-transform duration-150 relative flex flex-col justify-start box-border overflow-hidden"
       >
-        <div className="flex-1">
+        {/* Diagonal Page Background Watermark when revoked */}
+        {isEffectivelyRevoked && (
+          <div 
+            aria-hidden="true" 
+            className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden"
+          >
+            <div className="transform -rotate-35 border-[6px] border-red-600/20 px-8 py-3 rounded text-center">
+              <div className="text-red-600/20 text-5xl sm:text-6xl font-black tracking-[0.25em] uppercase font-mono">
+                АННУЛИРОВАНО
+              </div>
+              <div className="text-red-600/25 text-xs font-bold tracking-widest mt-1">
+                {effectiveRevokedAt} • {effectiveRevokedBy}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 relative z-10">
           {/* ================= 1. HEADER IMAGE (ONLY SHOWN FOR EXTERNAL ORGANIZATIONS) ================= */}
           {recipient.recipientType === 'external' && (
             <>
@@ -117,16 +154,16 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
           </div>
 
           {/* ================= 3. DATE & REF NUMBER LINE (STRICT SANS-SERIF GOST STYLE) ================= */}
-          <div className="flex items-end justify-between w-full border-b border-slate-300 pb-2 mb-8 text-xs text-slate-900 font-sans tracking-tight">
+          <div className="flex items-end justify-between w-full border-b border-slate-300 pb-2 mb-6 text-xs text-slate-900 font-sans tracking-tight">
             <div className="space-y-1">
               <div className="flex items-center gap-2 font-bold flex-wrap">
                 <span>Исх. № {effectiveRefNumber} от {cleanDate}г.</span>
-                {data.isRevoked && (
-                  <span className="px-2 py-0.5 bg-rose-600 text-white font-bold text-[9pt] rounded tracking-wide uppercase">
-                    ОТОЗВАНО
+                {isEffectivelyRevoked && (
+                  <span className="px-2 py-0.5 bg-red-600 text-white font-bold text-[9pt] rounded tracking-wide uppercase">
+                    ОТОЗВАНО / АННУЛИРОВАНО
                   </span>
                 )}
-                {data.corrections && data.corrections.length > 0 && !data.isRevoked && (
+                {data.corrections && data.corrections.length > 0 && !isEffectivelyRevoked && (
                   <span className="px-2 py-0.5 bg-indigo-100 text-indigo-900 border border-indigo-300 font-bold text-[8.5pt] rounded tracking-tight">
                     С ИСПРАВЛЕНИЯМИ ({data.corrections.length})
                   </span>
@@ -143,18 +180,67 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = React.memo(({ dat
             )}
           </div>
 
+          {/* ================= RED CLERICAL STAMP: "АННУЛИРОВАНО (дата подпись)" ================= */}
+          {isEffectivelyRevoked && (
+            <div className="annulled-stamp-wrapper mb-6 flex justify-end w-full relative z-20 select-none">
+              <div className="border-[3.5px] border-red-600 rounded-xs p-3 bg-red-50/95 text-red-600 font-sans shadow-md transform -rotate-3 hover:rotate-0 transition-transform duration-200 max-w-sm w-full relative overflow-hidden backdrop-blur-2xs">
+                {/* Inner decorative double stamp frame */}
+                <div className="border border-red-500 p-2.5 space-y-2">
+                  {/* Main stamp header */}
+                  <div className="text-center">
+                    <div className="text-[17pt] font-black tracking-[0.22em] uppercase text-red-600 font-mono leading-none flex items-center justify-center gap-1.5">
+                      <span className="text-[11pt]">★</span>
+                      <span>АННУЛИРОВАНО</span>
+                      <span className="text-[11pt]">★</span>
+                    </div>
+                    <div className="text-[7.5pt] uppercase tracking-widest text-red-700 font-bold mt-1">
+                      АО «НПО «Тепломаш»
+                    </div>
+                  </div>
+
+                  {/* Stamp separator line */}
+                  <div className="h-[2px] bg-red-600 w-full" />
+
+                  {/* Date and Signature: (дата подпись) */}
+                  <div className="space-y-1.5 text-[8.5pt] text-red-800 font-semibold">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-red-950">Дата:</span>
+                      <span className="font-mono font-bold text-red-600 border-b border-red-600 px-1 text-[9pt]">
+                        {effectiveRevokedAt}
+                      </span>
+                    </div>
+
+                    <div className="flex items-baseline justify-between gap-1 pt-0.5">
+                      <span className="font-bold text-red-950 shrink-0">Подпись:</span>
+                      <span className="flex-1 border-b border-red-600 text-right font-serif italic text-[8.5pt] text-red-800 pr-1 truncate">
+                        {effectiveRevokedBy ? `/${effectiveRevokedBy}/` : '___________'}
+                      </span>
+                    </div>
+
+                    {effectiveRevocationReason && (
+                      <div className="pt-1 border-t border-red-300 text-[7.5pt] text-red-900 leading-tight break-words">
+                        <span className="font-bold">Основание: </span>
+                        <span className="font-normal italic">{effectiveRevocationReason}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* REVOCATION WATERMARK / OFFICIAL NOTICE BANNER */}
-          {data.isRevoked && (
-            <div className="mb-6 p-3 bg-rose-50 border-2 border-rose-600 rounded-sm text-rose-950 font-sans text-[9pt] leading-tight space-y-1">
-              <div className="font-extrabold uppercase text-[10pt] text-rose-700 flex items-center gap-1.5">
+          {isEffectivelyRevoked && (
+            <div className="mb-6 p-3 bg-red-50/90 border-2 border-red-600 rounded-sm text-red-950 font-sans text-[9pt] leading-tight space-y-1">
+              <div className="font-extrabold uppercase text-[10pt] text-red-700 flex items-center gap-1.5">
                 <span>⛔ ДОКУМЕНТ ОТОЗВАН И УТРАТИЛ ЮРИДИЧЕСКУЮ СИЛУ</span>
               </div>
               <div className="text-slate-800">
-                <strong>Дата отзыва:</strong> {data.revokedAt || cleanDate} | <strong>Отозвано:</strong> {data.revokedBy || 'Администратор'}
+                <strong>Дата отзыва:</strong> {effectiveRevokedAt} | <strong>Отозвано:</strong> {effectiveRevokedBy}
               </div>
-              {data.revocationReason && (
+              {effectiveRevocationReason && (
                 <div className="text-slate-900 pt-0.5">
-                  <strong>Причина отзыва:</strong> {data.revocationReason}
+                  <strong>Причина отзыва:</strong> {effectiveRevocationReason}
                 </div>
               )}
             </div>
