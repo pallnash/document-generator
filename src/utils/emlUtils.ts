@@ -294,7 +294,7 @@ export const buildEmailHtmlWithCids = (
     formattedContent = formattedContent
       .split('\n')
       .filter(paragraph => paragraph.trim().length > 0)
-      .map(paragraph => `<p style="margin: 0 0 12px 0; text-indent: 24px;">${escapeHtml(paragraph)}</p>`)
+      .map(paragraph => `<p style="margin: 0 0 12px 0;">${escapeHtml(paragraph)}</p>`)
       .join('');
   }
 
