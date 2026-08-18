@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
+import { TEPLOMASH_HEADER_PNG_DATA_URL } from '../constants/teplomashHeaderPng';
 
 // Set up PDF.js worker
 if (typeof window !== 'undefined') {
@@ -106,7 +107,7 @@ export const PdfHeaderRenderer: React.FC<PdfHeaderRendererProps> = ({
           className="w-full h-32 block border-0"
         >
           <img
-            src="/teplomash-header.png"
+            src={TEPLOMASH_HEADER_PNG_DATA_URL}
             alt={alt}
             className="w-full h-auto block"
           />
