@@ -155,15 +155,8 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
   const [publishWarnings, setPublishWarnings] = useState<string[]>([]);
   const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState<boolean>(false);
 
-  const handleApplyCorrection = (correction: DocumentCorrection) => {
-    // 1. Append correction to document
-    const existingCorrections = data.corrections || [];
-    const updatedCorrections = [...existingCorrections, correction];
-    
-    const updatedDoc: DocumentData = {
-      ...data,
-      corrections: updatedCorrections
-    };
+  const handleApplyCorrection = (correction: DocumentCorrection, updatedDoc: DocumentData) => {
+    // 1. Update document with the new correction
     onChange(updatedDoc);
 
     // 2. Update the document entry in the registry
@@ -443,11 +436,22 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => setIsCorrectionModalOpen(true)}
+              onClick={() => {
+                if (!isAdmin) {
+                  if (onRequestAdminAuth) {
+                    onRequestAdminAuth();
+                  } else {
+                    setNotifyMsg('Внесение исправлений в зарегистрированный документ доступно только Администратору.');
+                    setTimeout(() => setNotifyMsg(null), 4000);
+                  }
+                  return;
+                }
+                setIsCorrectionModalOpen(true);
+              }}
               className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-bold text-xs rounded-lg transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
-              title="Внести заверенные исправления в опубликованное письмо"
+              title={isAdmin ? "Внести заверенные исправления в опубликованное письмо" : "Внесение исправлений доступно только Администратору"}
             >
-              <Pencil className="w-3.5 h-3.5" />
+              {isAdmin ? <Pencil className="w-3.5 h-3.5" /> : <KeyRound className="w-3.5 h-3.5" />}
               <span>Внести исправление (с подписью)</span>
             </button>
 
@@ -1576,6 +1580,14 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
           </div>
         </div>
       )}
+
+      {/* Certified Document Correction Modal */}
+      <CorrectionModal
+        isOpen={isCorrectionModalOpen}
+        onClose={() => setIsCorrectionModalOpen(false)}
+        documentData={data}
+        onConfirmCorrection={handleApplyCorrection}
+      />
     </div>
   );
 };

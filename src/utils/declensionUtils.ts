@@ -460,8 +460,8 @@ export function declineJobPosition(position: string, targetCase: GrammarCase = '
 
     const lower = rawWord.toLowerCase();
 
-    // Check prepositions (в, на, по, за, и, для, с, из, от)
-    if (['в', 'на', 'по', 'за', 'и', 'для', 'с', 'из', 'от'].includes(lower)) {
+    // Check prepositions and genitive department connectors
+    if (['в', 'на', 'по', 'за', 'и', 'для', 'с', 'из', 'от', 'отдела', 'службы', 'управления', 'департамента', 'лаборатории', 'сектора', 'цеха', 'участка', 'бюро'].includes(lower)) {
       passedPreposition = true;
       return word;
     }
@@ -489,8 +489,8 @@ export function declineJobPosition(position: string, targetCase: GrammarCase = '
 function declineJobPositionWord(word: string, targetCase: GrammarCase, isFirstWord: boolean): string {
   const lower = word.toLowerCase();
 
-  // Abbreviations and non-declinable nouns
-  if (['качества', 'автоматики', 'продаж', 'кадров', 'МТС', 'АХО', 'ПО', 'ИТ', 'ВЭД', 'ОКК', 'ОТК', 'АО', 'НПО', 'ООО', 'ЗАО', 'бюро', 'депо', 'руководство', 'производства', 'разработки', 'проекта', 'цеха', 'предприятия', 'завода', 'службы', 'управления', 'департамента', 'отдела'].includes(word) || word === word.toUpperCase()) {
+  // Abbreviations and non-declinable nouns / genitives
+  if (['качества', 'автоматики', 'продаж', 'кадров', 'приложений', 'технологий', 'автоматизации', 'цифровизации', 'обеспечения', 'МТС', 'АХО', 'ПО', 'ИТ', 'ВЭД', 'ОКК', 'ОТК', 'АО', 'НПО', 'ООО', 'ЗАО', 'бюро', 'депо', 'руководство', 'производства', 'разработки', 'проекта', 'цеха', 'предприятия', 'завода', 'службы', 'управления', 'департамента', 'отдела'].includes(lower) || word === word.toUpperCase()) {
     return word;
   }
 

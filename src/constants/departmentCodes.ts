@@ -58,6 +58,22 @@ export const DEPARTMENT_CODES: DepartmentCodeInfo[] = [
     keywords: ['снабжен', 'мтс', 'склад', 'материал', 'комплектующие', 'омтс']
   },
   {
+    name: 'Отдел цифровых технологий и автоматизации',
+    code: 'ТТ',
+    description: 'Цифровые технологии, автоматизация, разработка приложений и ПО',
+    keywords: [
+      'цифровых технологий и автоматизации',
+      'цифровых технологий',
+      'отдел цифровых технологий',
+      'автоматизации',
+      'программист приложений',
+      'начальник отдела цифровых технологий',
+      'начальник отдела цифровых технологий и автоматизации',
+      'цифровизац',
+      'оцта'
+    ]
+  },
+  {
     name: 'Отдел информационного обеспечения',
     code: 'И',
     description: 'ИТ, автоматика, ПО, базы данных и связь',
@@ -203,6 +219,7 @@ export const getDefaultDeptCounters = (): DeptCounters => {
     'К': 1,
     'М': 1,
     'С': 1,
+    'ТТ': 1,
     'И': 1,
     'А': 1,
     'П': 1
@@ -444,6 +461,8 @@ export const unrevokeDocumentInDb = (id: string): { success: boolean } => {
 export const recordCorrectionInRegistry = (params: {
   regNumber: string;
   reason: string;
+  correctedBy?: string;
+  timestamp?: string;
 }): void => {
   if (!params.regNumber) return;
   const registry = getDocumentRegistry();
@@ -456,7 +475,7 @@ export const recordCorrectionInRegistry = (params: {
     ...target,
     correctionsCount: currentCount + 1,
     lastCorrectionReason: params.reason,
-    lastCorrectedAt: new Date().toLocaleString('ru-RU', {
+    lastCorrectedAt: params.timestamp || new Date().toLocaleString('ru-RU', {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
     })
@@ -532,7 +551,7 @@ export const generateDocumentNumber = (
  */
 export const parseRefNumber = (refNum?: string) => {
   if (!refNum) return null;
-  const match = refNum.match(/(\d{4})\/(\d+)([А-ЯA-Zа-яa-z])/);
+  const match = refNum.match(/(\d{4})\/(\d+)([А-ЯA-Zа-яa-z]+)/);
   if (match) {
     return {
       ddmm: match[1],

@@ -155,3 +155,25 @@ describe('регрессия: undefined-поля не ломают цепочк�
     expect(noKey[0].hash).not.toBe(withKey[0].hash);
   });
 });
+
+describe('Department TT (Отдел цифровых технологий и автоматизации)', () => {
+  it('guessDepartmentCode определяет ТТ для отдела цифровых технологий и автоматизации', async () => {
+    const { guessDepartmentCode, parseRefNumber, generateDocumentNumber } = await import('./departmentCodes');
+    expect(guessDepartmentCode('Отдел цифровых технологий и автоматизации')).toBe('ТТ');
+    expect(guessDepartmentCode('Отдел цифровых технологий')).toBe('ТТ');
+    expect(guessDepartmentCode('', 'Программист приложений')).toBe('ТТ');
+    expect(guessDepartmentCode('', 'Начальник отдела цифровых технологий и автоматизации')).toBe('ТТ');
+  });
+
+  it('generateDocumentNumber и parseRefNumber корректно формируют и парсят номер с кодом ТТ', async () => {
+    const { generateDocumentNumber, parseRefNumber } = await import('./departmentCodes');
+    const num = generateDocumentNumber('18.08.2026', 1, 'ТТ');
+    expect(num).toBe('1808/1ТТ');
+    const parsed = parseRefNumber(num);
+    expect(parsed).toEqual({
+      ddmm: '1808',
+      seq: 1,
+      code: 'ТТ'
+    });
+  });
+});

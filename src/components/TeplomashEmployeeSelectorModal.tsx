@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { TEPLOMASH_EMPLOYEES, TeplomashEmployee, sanitizeEmployeeDepartments } from '../constants/teplomashEmployees';
+import { DEPARTMENT_CODES } from '../constants/departmentCodes';
+import { declineFio, declineJobPosition } from '../utils/declensionUtils';
 import { 
   X, 
   Search, 
@@ -600,13 +602,14 @@ export const TeplomashEmployeeSelectorModal: React.FC<TeplomashEmployeeSelectorM
                   onChange={e => {
                     const fullName = e.target.value;
                     const autoShort = generateShortName(fullName);
+                    const autoDative = declineFio(fullName, 'dative');
                     setEditingEmployee(prev => {
                       if (!prev) return null;
                       return {
                         ...prev,
                         fullName,
-                        shortName: prev.shortName ? prev.shortName : autoShort,
-                        dativeName: prev.dativeName ? prev.dativeName : autoShort
+                        shortName: (!prev.shortName || prev.shortName === generateShortName(prev.fullName)) ? autoShort : prev.shortName,
+                        dativeName: (!prev.dativeName || prev.dativeName === declineFio(prev.fullName, 'dative') || prev.dativeName === prev.shortName) ? autoDative : prev.dativeName
                       };
                     });
                   }}
@@ -644,21 +647,32 @@ export const TeplomashEmployeeSelectorModal: React.FC<TeplomashEmployeeSelectorM
                 <input
                   type="text"
                   required
+                  list="employee-position-presets"
                   value={editingEmployee.position}
                   onChange={e => {
                     const position = e.target.value;
+                    const autoDativePos = declineJobPosition(position, 'dative');
                     setEditingEmployee(prev => {
                       if (!prev) return null;
                       return {
                         ...prev,
                         position,
-                        dativePosition: prev.dativePosition ? prev.dativePosition : position
+                        dativePosition: (!prev.dativePosition || prev.dativePosition === declineJobPosition(prev.position, 'dative') || prev.dativePosition === prev.position) ? autoDativePos : prev.dativePosition
                       };
                     });
                   }}
-                  placeholder="Например: Ведущий инженер"
+                  placeholder="Например: Программист приложений"
                   className="w-full px-3 py-2 bg-white rounded border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
+                <datalist id="employee-position-presets">
+                  <option value="Программист приложений" />
+                  <option value="Начальник отдела цифровых технологий и автоматизации" />
+                  <option value="Инженер-программист" />
+                  <option value="Ведущий программист" />
+                  <option value="Начальник отдела" />
+                  <option value="Главный инженер" />
+                  <option value="Генеральный директор" />
+                </datalist>
               </div>
 
               <div>
@@ -667,7 +681,7 @@ export const TeplomashEmployeeSelectorModal: React.FC<TeplomashEmployeeSelectorM
                   type="text"
                   value={editingEmployee.dativePosition}
                   onChange={e => setEditingEmployee({ ...editingEmployee, dativePosition: e.target.value })}
-                  placeholder="Ведущему инженеру"
+                  placeholder="Программисту приложений"
                   className="w-full px-3 py-2 bg-white rounded border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
@@ -677,11 +691,17 @@ export const TeplomashEmployeeSelectorModal: React.FC<TeplomashEmployeeSelectorM
                   <label className="block font-semibold text-slate-700 mb-1">Отдел / Подразделение</label>
                   <input
                     type="text"
+                    list="employee-dept-presets"
                     value={editingEmployee.department}
                     onChange={e => setEditingEmployee({ ...editingEmployee, department: e.target.value })}
-                    placeholder="Отдел автоматики"
+                    placeholder="Отдел цифровых технологий и автоматизации"
                     className="w-full px-3 py-2 bg-white rounded border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none"
                   />
+                  <datalist id="employee-dept-presets">
+                    {DEPARTMENT_CODES.map(d => (
+                      <option key={d.code} value={d.name}>{`[${d.code}] ${d.name}`}</option>
+                    ))}
+                  </datalist>
                 </div>
 
                 <div>
