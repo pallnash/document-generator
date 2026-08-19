@@ -315,6 +315,9 @@ export const buildEmailHtmlWithCids = (
   table { border-spacing: 0; border-collapse: collapse; }
   td { padding: 0; }
   img { border: 0; outline: none; text-decoration: none; }
+  .doc-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 9pt; }
+  .doc-table th, .doc-table td { border: 1px solid #334155; padding: 5px 6px; }
+  .doc-table th { background-color: #f1f5f9; font-weight: bold; }
 </style>
 </head>
 <body style="margin: 0; padding: 20px 0; background-color: #f1f5f9;">
@@ -408,7 +411,7 @@ export const buildEmailHtmlWithCids = (
               </table>
 
               <!-- DOCUMENT CONTENT BODY -->
-              <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 32px;">
+              <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                 <tr>
                   <td align="justify" style="font-family: ${fontCss}; font-size: ${fontSize}pt; line-height: ${lineSpacing || 1.35}; color: #0f172a;">
                     ${formattedContent}
@@ -416,22 +419,34 @@ export const buildEmailHtmlWithCids = (
                 </tr>
               </table>
 
-              <!-- SIGNATURE & SENDER ROW WITH EMBEDDED OVERLAPPING ROUND STAMP SEAL NEAR FIO -->
-              <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top: 1px solid #cbd5e1; padding-top: 22px; margin-top: 32px;">
+              ${(data.showAttachmentsMark || (data.attachments && data.attachments.length > 0)) ? `
+                <!-- ATTACHMENTS NOTE (ГОСТ Р 7.0.97) -->
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+                  <tr>
+                    <td align="left" style="font-family: ${fontCss}; font-size: ${fontSize}pt; line-height: 1.4; color: #0f172a;">
+                      ${escapeHtml(
+                        data.attachmentsMarkText || 
+                        (data.attachments && data.attachments.length > 0 
+                          ? (data.attachments.length === 1 
+                              ? `Приложение: ${data.attachments[0].title} на ${data.attachments[0].sheetsCount || 1} л. в ${data.attachments[0].copiesCount || 1} экз.`
+                              : `Приложение: ` + data.attachments.map((a, i) => `${i + 1}. ${a.title} на ${a.sheetsCount || 1} л. в ${a.copiesCount || 1} экз.`).join('\n            '))
+                          : 'Приложение: на 1 л. в 1 экз.')
+                      ).replace(/\n/g, '<br/>')}
+                    </td>
+                  </tr>
+                </table>
+              ` : ''}
+
+              <!-- SIGNATURE & SENDER ROW -->
+              <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top: 1px solid #cbd5e1; padding-top: 20px; margin-top: 24px;">
                 <tr>
-                  <td width="38%" align="left" valign="top" style="font-family: ${fontCss}; font-size: ${fontSize - 1}pt; line-height: 1.35; color: #0f172a;">
-                    <div style="font-weight: bold;">
-                      ${escapeHtml(signature.senderPosition)}
+                  <td width="42%" align="left" valign="top" style="font-family: ${fontCss}; font-size: ${fontSize - 1}pt; line-height: 1.35; color: #0f172a;">
+                    <div style="font-weight: 500;">
+                      ${escapeHtml(signature.senderPosition || 'Должность')}
                     </div>
-                    ${signature.senderDepartment && !signature.senderPosition.toLowerCase().includes(signature.senderDepartment.toLowerCase()) ? `
-                      <div style="color: #334155; margin-top: 2px;">${escapeHtml(signature.senderDepartment)}</div>
-                    ` : ''}
-                    ${signature.senderOrganization ? `
-                      <div style="font-size: 9pt; color: #64748b; margin-top: 2px;">${escapeHtml(signature.senderOrganization)}</div>
-                    ` : ''}
                   </td>
 
-                  <td width="36%" align="center" valign="middle" style="position: relative;">
+                  <td width="30%" align="center" valign="middle" style="position: relative;">
                     ${signature.useDigitalSignature ? `
                       <div style="border: 2px solid #312e81; background-color: #f0fdf4; border-radius: 4px; padding: 6px 8px; font-family: Arial, sans-serif; font-size: 8pt; color: #1e1b4b; text-align: left; line-height: 1.3;">
                         <div style="font-weight: bold; border-bottom: 1px solid #4338ca; padding-bottom: 3px; margin-bottom: 3px; font-size: 7.5pt; color: #312e81;">
@@ -450,22 +465,34 @@ export const buildEmailHtmlWithCids = (
                     `}
                   </td>
 
-                  <td width="36%" align="right" valign="top" style="font-family: ${fontCss}; font-size: ${fontSize - 1}pt; color: #0f172a; position: relative;">
-                    <div style="font-weight: bold; position: relative; z-index: 10;">
+                  <td width="28%" align="right" valign="top" style="font-family: ${fontCss}; font-size: ${fontSize - 1}pt; color: #0f172a;">
+                    <div style="font-weight: bold;">
                       ${escapeHtml(signature.senderName || 'Ф.И.О.')}
                     </div>
                   </td>
                 </tr>
               </table>
 
-              <!-- FOOTER NOTE -->
-              <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top: 36px; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
-                <tr>
-                  <td align="center" style="font-family: Arial, sans-serif; font-size: 8.5pt; color: #94a3b8;">
-                    Официальный документ АО «НПО «Тепломаш»
-                  </td>
-                </tr>
-              </table>
+              ${(data.attachments && data.attachments.length > 0) ? `
+                <!-- ATTACHMENT SHEETS CONTENT -->
+                <div style="margin-top: 40px; border-top: 2px dashed #94a3b8; padding-top: 30px;">
+                  ${data.attachments.map((att, idx) => `
+                    <div style="margin-bottom: 36px; padding: 20px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+                      <div style="text-align: right; font-family: Arial, sans-serif; font-size: 8.5pt; color: #475569; margin-bottom: 16px;">
+                        <b>Приложение № ${att.number || idx + 1}</b><br/>
+                        к письму АО «НПО «Тепломаш»<br/>
+                        от ${escapeHtml(date || '')}г. № ${escapeHtml(data.refNumber || '')}
+                      </div>
+                      <div style="text-align: center; font-family: ${fontCss}; font-size: ${fontSize}pt; font-weight: bold; text-transform: uppercase; margin-bottom: 14px; color: #0f172a;">
+                        ${escapeHtml(att.title || `ПРИЛОЖЕНИЕ № ${att.number || idx + 1}`)}
+                      </div>
+                      <div style="font-family: ${fontCss}; font-size: ${fontSize - 1}pt; line-height: 1.4; color: #1e293b; text-align: justify;">
+                        ${sanitizeHtml(att.content)}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
 
             </td>
           </tr>

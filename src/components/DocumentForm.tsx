@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { DocumentData } from '../types';
+import { DocumentData, DocumentAttachment } from '../types';
 import { TEPLOMASH_EMPLOYEES, TeplomashEmployee } from '../constants/teplomashEmployees';
 import { getInitialBlankDocument } from '../constants/presets';
 import { validateDocument, ValidationError, getFieldErrors, isValidEmail } from '../utils/validationUtils';
@@ -62,8 +62,199 @@ import {
   AlertTriangle,
   ShieldAlert,
   Mail,
-  Wand2
+  Wand2,
+  Paperclip,
+  Layers,
+  PlusCircle,
+  ArrowUp,
+  ArrowDown,
+  Plus,
+  Table,
+  Eye,
+  EyeOff
 } from 'lucide-react';
+
+export const EQUIPMENT_SPECIFICATION_HTML = `<p><b>Спецификация поставляемого оборудования и материалов:</b></p>
+<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 8px; font-size: 9.5pt;">
+  <thead>
+    <tr style="background-color: #f1f5f9; text-align: center; font-weight: bold;">
+      <th style="width: 6%; border: 1px solid #1e293b; padding: 5px;">№</th>
+      <th style="width: 44%; border: 1px solid #1e293b; padding: 5px; text-align: left;">Наименование и технические характеристики</th>
+      <th style="width: 18%; border: 1px solid #1e293b; padding: 5px;">Марка / Артикул</th>
+      <th style="width: 10%; border: 1px solid #1e293b; padding: 5px;">Ед. изм.</th>
+      <th style="width: 10%; border: 1px solid #1e293b; padding: 5px;">Кол-во</th>
+      <th style="width: 12%; border: 1px solid #1e293b; padding: 5px;">Примечание</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">1</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Воздушно-тепловая завеса промышленная водяная (длина 1.5 м, IP21)</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-family: monospace; font-size: 9pt;">КЭВ-45П4141W</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">шт.</td>
+      <td style="text-align: center; font-weight: bold; border: 1px solid #1e293b; padding: 5px;">2</td>
+      <td style="border: 1px solid #1e293b; padding: 5px; font-size: 8.5pt;">Пульт HL10 в комплекте</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">2</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Тепловентилятор водяной настенный промышленный</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-family: monospace; font-size: 9pt;">КЭВ-60MW</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">шт.</td>
+      <td style="text-align: center; font-weight: bold; border: 1px solid #1e293b; padding: 5px;">4</td>
+      <td style="border: 1px solid #1e293b; padding: 5px; font-size: 8.5pt;">Кронштейн настенный</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">3</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Узел терморегулирования с двухходовым клапаном</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-family: monospace; font-size: 9pt;">УТ-КЭВ-4/6</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">компл.</td>
+      <td style="text-align: center; font-weight: bold; border: 1px solid #1e293b; padding: 5px;">2</td>
+      <td style="border: 1px solid #1e293b; padding: 5px; font-size: 8.5pt;">Kvs 6.3 м³/ч</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">4</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Блок коммутации и согласования</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-family: monospace; font-size: 9pt;">БКУ-WA</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">шт.</td>
+      <td style="text-align: center; font-weight: bold; border: 1px solid #1e293b; padding: 5px;">1</td>
+      <td style="border: 1px solid #1e293b; padding: 5px; font-size: 8.5pt;">До 10 завес</td>
+    </tr>
+  </tbody>
+</table>
+<p style="font-size: 9pt; color: #334155; margin-top: 6px;"><b>Итого:</b> 9 единиц оборудования в 4 наименованиях.<br/>Все оборудование сертифицировано в соответствии с ГОСТ и стандартами ЕАС, сопровождается паспортами качества завода-изготовителя АО «НПО «Тепломаш». Гарантийный срок — 24 месяца с даты ввода в эксплуатацию.</p>`;
+
+export const TECHNICAL_ASSIGNMENT_HTML = `<p><b>Технические требования к оборудованию:</b></p>
+<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 8px; font-size: 9.5pt;">
+  <thead>
+    <tr style="background-color: #f1f5f9; text-align: center; font-weight: bold;">
+      <th style="width: 8%; border: 1px solid #1e293b; padding: 5px;">№</th>
+      <th style="width: 42%; border: 1px solid #1e293b; padding: 5px; text-align: left;">Параметр / Требование</th>
+      <th style="width: 50%; border: 1px solid #1e293b; padding: 5px; text-align: left;">Установленное нормативное значение</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">1</td>
+      <td style="border: 1px solid #1e293b; padding: 5px; font-weight: 500;">Теплоноситель</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Вода по ГОСТ 2874 (t = 95/70 °C, Pmax = 1.6 МПа)</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-weight: 500;">Электропитание</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">~380 В / 50 Гц (трехфазное) / 220 В для цепей управления</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-weight: 500;">Класс защиты оболочки</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Не ниже IP21 (для завес) / IP54 (для щита управления)</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-weight: 500;">Уровень звукового давления</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Не более 58 дБА на расстоянии 5 метров</td>
+    </tr>
+  </tbody>
+</table>
+<p style="font-size: 9pt; color: #334155; margin-top: 6px;">Монтаж и пусконаладочные работы осуществляются силами сертифицированных специалистов с соблюдением требований ПУЭ и СНиП.</p>`;
+
+export const ACCEPTANCE_ACT_HTML = `<p><b>Перечень передаваемого оборудования и документации:</b></p>
+<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 8px; font-size: 9.5pt;">
+  <thead>
+    <tr style="background-color: #f1f5f9; text-align: center; font-weight: bold;">
+      <th style="width: 8%; border: 1px solid #1e293b; padding: 5px;">№</th>
+      <th style="width: 52%; border: 1px solid #1e293b; padding: 5px; text-align: left;">Наименование объекта передачи</th>
+      <th style="width: 15%; border: 1px solid #1e293b; padding: 5px;">Количество</th>
+      <th style="width: 25%; border: 1px solid #1e293b; padding: 5px;">Состояние / Отметка</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">1</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Тепловая завеса КЭВ-45П4141W</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-weight: bold;">2 шт.</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; color: #166534; font-weight: 500;">Исправно, упаковано</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">2</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Паспорт и руководство по эксплуатации</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-weight: bold;">2 экз.</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; color: #166534; font-weight: 500;">Оригинал с печатью ОТК</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">3</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Пульт управления HL10</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-weight: bold;">2 шт.</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; color: #166534; font-weight: 500;">Комплектно</td>
+    </tr>
+  </tbody>
+</table>
+<p style="font-size: 9pt; color: #334155; margin-top: 6px;">Претензий по качеству, комплектности и внешнему виду принимающая сторона не имеет.</p>`;
+
+export const COST_ESTIMATE_HTML = `<p><b>Смета стоимости оборудования и монтажных работ:</b></p>
+<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 8px; font-size: 9.5pt;">
+  <thead>
+    <tr style="background-color: #f1f5f9; text-align: center; font-weight: bold;">
+      <th style="width: 6%; border: 1px solid #1e293b; padding: 5px;">№</th>
+      <th style="width: 44%; border: 1px solid #1e293b; padding: 5px; text-align: left;">Наименование позиции</th>
+      <th style="width: 10%; border: 1px solid #1e293b; padding: 5px;">Кол-во</th>
+      <th style="width: 20%; border: 1px solid #1e293b; padding: 5px;">Цена за ед., руб.</th>
+      <th style="width: 20%; border: 1px solid #1e293b; padding: 5px;">Сумма с НДС, руб.</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">1</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Тепловая завеса КЭВ-45П4141W</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">2 шт.</td>
+      <td style="text-align: right; border: 1px solid #1e293b; padding: 5px; font-family: monospace;">54 800,00</td>
+      <td style="text-align: right; border: 1px solid #1e293b; padding: 5px; font-family: monospace; font-weight: bold;">109 600,00</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">2</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Смесительный узел УТ-КЭВ-4/6</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">2 шт.</td>
+      <td style="text-align: right; border: 1px solid #1e293b; padding: 5px; font-family: monospace;">18 500,00</td>
+      <td style="text-align: right; border: 1px solid #1e293b; padding: 5px; font-family: monospace; font-weight: bold;">37 000,00</td>
+    </tr>
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">3</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Монтажные и пусконаладочные работы</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">1 компл.</td>
+      <td style="text-align: right; border: 1px solid #1e293b; padding: 5px; font-family: monospace;">25 000,00</td>
+      <td style="text-align: right; border: 1px solid #1e293b; padding: 5px; font-family: monospace; font-weight: bold;">25 000,00</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr style="background-color: #f8fafc; font-weight: bold;">
+      <td colspan="4" style="text-align: right; border: 1px solid #1e293b; padding: 5px;">Итого с учетом НДС 20%:</td>
+      <td style="text-align: right; border: 1px solid #1e293b; padding: 5px; font-family: monospace; font-size: 10pt; color: #1e1b4b;">171 600,00</td>
+    </tr>
+  </tfoot>
+</table>
+<p style="font-size: 9pt; color: #334155; margin-top: 6px;">Условия оплаты: 50% аванс, 50% по факту готовности к отгрузке со склада в г. Санкт-Петербург.</p>`;
+
+// Helper to append a new equipment row to an existing HTML table
+export const appendEquipmentRowToHtml = (htmlContent: string): string => {
+  if (!htmlContent.includes('<table')) {
+    return EQUIPMENT_SPECIFICATION_HTML;
+  }
+  const rowMatches = htmlContent.match(/<tr>/gi) || [];
+  const nextNum = Math.max(1, rowMatches.length);
+  const newRow = `
+    <tr>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">${nextNum}</td>
+      <td style="border: 1px solid #1e293b; padding: 5px;">Новая позиция оборудования Тепломаш</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px; font-family: monospace; font-size: 9pt;">КЭВ-...</td>
+      <td style="text-align: center; border: 1px solid #1e293b; padding: 5px;">шт.</td>
+      <td style="text-align: center; font-weight: bold; border: 1px solid #1e293b; padding: 5px;">1</td>
+      <td style="border: 1px solid #1e293b; padding: 5px; font-size: 8.5pt;">Стандартная комплектация</td>
+    </tr>
+  </tbody>`;
+  
+  if (htmlContent.includes('</tbody>')) {
+    return htmlContent.replace('</tbody>', newRow);
+  } else if (htmlContent.includes('</table>')) {
+    return htmlContent.replace('</table>', `<tbody>${newRow}</table>`);
+  }
+  return htmlContent + '\n' + EQUIPMENT_SPECIFICATION_HTML;
+};
 
 interface DocumentFormProps {
   data: DocumentData;
@@ -108,9 +299,12 @@ const htmlToText = (html: string): string => {
     .replace(/<\/p>/gi, '');
 };
 
-// Helper to convert multiline text back into clean HTML <p> tags preserving spaces
+// Helper to convert multiline text back into clean HTML <p> tags preserving tables
 const textToHtml = (text: string): string => {
   if (!text) return '';
+  if (text.includes('<table')) {
+    return text;
+  }
   const blocks = text.split(/\n\s*\n/);
   return blocks
     .map(block => {
@@ -144,7 +338,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
   const [rawText, setRawText] = useState(() => htmlToText(data.content));
 
   // Document Number Generator & Department Sequential Registry States
-  const parsedRef = parseRefNumber(data.refNumber);
+  const parsedRef = data.isPublished && data.refNumber && data.refNumber !== '0508/1И' ? parseRefNumber(data.refNumber) : null;
   const [deptCounters, setDeptCounters] = useState<DeptCounters>(() => getDeptCounters());
   const [registryList, setRegistryList] = useState<RegisteredDocument[]>(() => getDocumentRegistry());
   const [isCountersModalOpen, setIsCountersModalOpen] = useState<boolean>(false);
@@ -154,6 +348,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
   const [isPublishConfirmOpen, setIsPublishConfirmOpen] = useState<boolean>(false);
   const [publishWarnings, setPublishWarnings] = useState<string[]>([]);
   const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState<boolean>(false);
+  const [attPreviewMap, setAttPreviewMap] = useState<Record<string, boolean>>({});
 
   const handleApplyCorrection = (correction: DocumentCorrection, updatedDoc: DocumentData) => {
     // 1. Update document with the new correction
@@ -194,10 +389,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
   }, [isInternal, recipientSearchQuery, employeeList]);
 
   const applyRecipientSuggestion = (emp: TeplomashEmployee) => {
-    const rawPos = emp.dativePosition || declineJobPosition(emp.position, 'dative');
-    const formattedPos = (emp.department && !rawPos.toLowerCase().includes(emp.department.toLowerCase()))
-      ? `${rawPos} (${emp.department})`
-      : rawPos;
+    const formattedPos = emp.dativePosition || declineJobPosition(emp.position, 'dative');
     const rawName = emp.dativeName || declineFio(emp.shortName || emp.fullName, 'dative');
 
     onChange({
@@ -280,10 +472,9 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
     // Контроль полноты перед публикацией (подпись + печать обязательны)
     const warnings: string[] = [];
     const sig = data.signature;
-    const hasGraphicSignature = sig.type === 'image' && !!sig.imageUrl || sig.type === 'canvas';
-    const hasDigitalSignature = !!sig.useDigitalSignature;
-    if (!hasGraphicSignature && !hasDigitalSignature) {
-      warnings.push('В документе отсутствует подпись (графическая или ЭП).');
+    const hasGraphicSignature = (sig.type === 'image' && !!sig.imageUrl) || sig.type === 'canvas';
+    if (!hasGraphicSignature && sig.type !== 'placeholder') {
+      warnings.push('В документе отсутствует подпись.');
     }
     if (sig.showStamp && !sig.stampImageUrl) {
       warnings.push('Выбрана печать, но изображение печати не загружено.');
@@ -359,6 +550,89 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
     setRawText(val);
     const newHtml = textToHtml(val);
     onChange({ ...data, content: newHtml });
+  };
+
+  // Attachment Handlers
+  const handleAddAttachment = (presetTitle?: string) => {
+    const existing = data.attachments || [];
+    const nextNum = existing.length + 1;
+    let defaultContent = '<p>Текст и содержание приложения к документу...</p>';
+
+    if (presetTitle === 'Спецификация оборудования' || presetTitle === 'Спецификация') {
+      defaultContent = EQUIPMENT_SPECIFICATION_HTML;
+    } else if (presetTitle === 'Техническое задание') {
+      defaultContent = TECHNICAL_ASSIGNMENT_HTML;
+    } else if (presetTitle === 'Акт приема-передачи') {
+      defaultContent = ACCEPTANCE_ACT_HTML;
+    } else if (presetTitle === 'Смета расходов') {
+      defaultContent = COST_ESTIMATE_HTML;
+    } else if (presetTitle) {
+      defaultContent = `<p>1. Текст приложения «${presetTitle}».</p>`;
+    }
+
+    const newAttachment: DocumentAttachment = {
+      id: `att-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      number: nextNum,
+      title: presetTitle || `Приложение № ${nextNum}`,
+      content: defaultContent,
+      sheetsCount: 1,
+      copiesCount: 1
+    };
+    const updatedAttachments = [...existing, newAttachment];
+    onChange({
+      ...data,
+      showAttachmentsMark: true,
+      attachments: updatedAttachments
+    });
+  };
+
+  const handleUpdateAttachment = (id: string, updates: Partial<DocumentAttachment>) => {
+    const existing = data.attachments || [];
+    const updated = existing.map(att => att.id === id ? { ...att, ...updates } : att);
+    onChange({
+      ...data,
+      attachments: updated
+    });
+  };
+
+  const handleDeleteAttachment = (id: string) => {
+    const existing = data.attachments || [];
+    const filtered = existing.filter(att => att.id !== id).map((att, idx) => ({
+      ...att,
+      number: idx + 1
+    }));
+    onChange({
+      ...data,
+      attachments: filtered,
+      showAttachmentsMark: filtered.length > 0 ? data.showAttachmentsMark : false
+    });
+  };
+
+  const handleMoveAttachment = (index: number, direction: 'up' | 'down') => {
+    const existing = [...(data.attachments || [])];
+    if (direction === 'up' && index > 0) {
+      const temp = existing[index];
+      existing[index] = existing[index - 1];
+      existing[index - 1] = temp;
+    } else if (direction === 'down' && index < existing.length - 1) {
+      const temp = existing[index];
+      existing[index] = existing[index + 1];
+      existing[index + 1] = temp;
+    }
+    const reindexed = existing.map((att, idx) => ({ ...att, number: idx + 1 }));
+    onChange({ ...data, attachments: reindexed });
+  };
+
+  const handleGenerateAttachmentMark = () => {
+    const atts = data.attachments || [];
+    if (atts.length === 0) {
+      onChange({ ...data, attachmentsMarkText: 'Приложение: на 1 л. в 1 экз.' });
+    } else if (atts.length === 1) {
+      onChange({ ...data, attachmentsMarkText: `Приложение: ${atts[0].title} на ${atts[0].sheetsCount || 1} л. в ${atts[0].copiesCount || 1} экз.` });
+    } else {
+      const mark = `Приложение: ` + atts.map((a, i) => `${i + 1}. ${a.title} на ${a.sheetsCount || 1} л. в ${a.copiesCount || 1} экз.`).join('\n            ');
+      onChange({ ...data, attachmentsMarkText: mark });
+    }
   };
 
   const handleRecipientChange = (field: keyof typeof data.recipient, value: string) => {
@@ -1073,7 +1347,9 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
 
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono font-extrabold text-indigo-950 bg-indigo-100/80 border border-indigo-200 px-3 py-1.5 rounded shadow-2xs">
-              {data.refNumber || generateDocumentNumber(data.date || new Date().toLocaleDateString('ru-RU'), seqIndex, selectedDeptCode)}
+              {data.isPublished && data.refNumber && data.refNumber !== '0508/1И'
+                ? data.refNumber
+                : generateDocumentNumber(data.date || new Date().toLocaleDateString('ru-RU'), seqIndex, selectedDeptCode)}
             </span>
           </div>
         </div>
@@ -1362,7 +1638,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
           <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-600 mb-1">
             <span>Официальные клише ({isInternal ? 'для внутренних документов' : 'для внешних писем'}):</span>
           </div>
-          <div className="flex flex-wrap gap-1.5 mb-2">
+          <div className="flex flex-wrap items-center gap-1.5 mb-2">
             {isInternal ? (
               <>
                 <button
@@ -1467,13 +1743,406 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
         </div>
       </div>
 
-      {/* 5. PUBLISH DOCUMENT ACTION CARD */}
+      {/* 5. MULTI-PAGE & ATTACHMENTS (ГОСТ Р 7.0.97-2025) */}
+      <div className="bg-white border border-slate-200 rounded-lg p-4 space-y-4 shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+            <div className="w-5 h-5 rounded-sm bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <Layers className="w-3.5 h-3.5" />
+            </div>
+            <span>5. Многостраничность и Приложения (ГОСТ)</span>
+          </div>
+        </div>
+
+        {/* 5.1 MULTI-PAGE TOGGLE & OVERFLOW FITTING */}
+        <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2.5">
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={data.allowMultiPage || false}
+                onChange={(e) => onChange({ ...data, allowMultiPage: e.target.checked })}
+                className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer"
+              />
+              <div>
+                <span className="text-xs font-bold text-slate-900 block">
+                  Разрешить многостраничный документ
+                </span>
+                <span className="text-[10px] text-slate-500 block leading-tight">
+                  Автоматический перенос текста на следующие листы А4 с нумерацией со 2-й страницы (- 2 -, - 3 -)
+                </span>
+              </div>
+            </label>
+            <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${data.allowMultiPage ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}`}>
+              {data.allowMultiPage ? 'Включено' : 'Выключено'}
+            </span>
+          </div>
+
+          {/* Quick Fit to 1 page if text is long */}
+          {rawText.length > 520 && (
+            <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between gap-2 text-xs">
+              <span className="text-slate-600 text-[11px]">
+                {data.fontSize === 12 
+                  ? 'Применен кегль 12 pt для вмещения на одном листе' 
+                  : 'Текст не помещается на 1 лист (при 14 кегле)'}
+              </span>
+              {data.fontSize === 12 ? (
+                <button
+                  type="button"
+                  onClick={() => onChange({
+                    ...data,
+                    fontSize: 14,
+                    lineSpacing: 1.5,
+                    allowMultiPage: true
+                  })}
+                  className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-800 font-bold rounded border border-slate-300 transition-colors cursor-pointer text-[11px]"
+                >
+                  Вернуть 14 pt
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onChange({
+                    ...data,
+                    fontSize: 12,
+                    lineSpacing: 1.15,
+                    allowMultiPage: false
+                  })}
+                  className="px-3 py-1 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold rounded transition-all cursor-pointer text-[11px]"
+                >
+                  Уместить на 1 листе (12 pt)
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 5.2 ATTACHMENTS SECTION */}
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={data.showAttachmentsMark || (data.attachments && data.attachments.length > 0) || false}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  onChange({
+                    ...data,
+                    showAttachmentsMark: checked,
+                    attachments: checked && (!data.attachments || data.attachments.length === 0)
+                      ? [
+                          {
+                            id: `att-${Date.now()}`,
+                            number: 1,
+                            title: 'Техническое задание',
+                            content: '<p>1. Основные технические требования к оборудованию и условиям поставки.</p>',
+                            sheetsCount: 1,
+                            copiesCount: 1
+                          }
+                        ]
+                      : data.attachments
+                  });
+                }}
+                className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer"
+              />
+              <span className="text-xs font-bold text-slate-800">
+                Добавить приложения к письму
+              </span>
+            </label>
+            <span className="text-[11px] font-medium text-slate-500">
+              {(data.attachments && data.attachments.length > 0) ? `${data.attachments.length} прилож.` : 'Нет'}
+            </span>
+          </div>
+
+          {(data.showAttachmentsMark || (data.attachments && data.attachments.length > 0)) && (
+            <div className="space-y-3 pl-1 border-l-2 border-indigo-200 ml-1">
+              
+              {/* Attachment Mark before signature input */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                    Отметка о наличии приложения (перед подписью)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleGenerateAttachmentMark}
+                    className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 cursor-pointer"
+                    title="Сформировать текст отметки по ГОСТ Р 7.0.97-2025"
+                  >
+                    <Wand2 className="w-3 h-3" />
+                    <span>Сгенерировать по ГОСТ 2025</span>
+                  </button>
+                </div>
+                <textarea
+                  rows={2}
+                  value={data.attachmentsMarkText || ''}
+                  onChange={(e) => onChange({ ...data, attachmentsMarkText: e.target.value })}
+                  placeholder="Например: Приложение: 1. Техническое задание на 2 л. в 1 экз.&#10;            2. Спецификация оборудования на 1 л. в 2 экз."
+                  className="w-full text-xs p-2.5 rounded border border-slate-300 focus:ring-1 focus:ring-indigo-500 outline-none font-sans"
+                />
+              </div>
+
+              {/* Quick Presets for Attachments */}
+              <div className="space-y-1.5">
+                <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Быстрое добавление типовых приложений:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleAddAttachment('Спецификация оборудования')}
+                    className="px-2 py-1 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 rounded border border-slate-200 transition-colors flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3 text-indigo-600" />
+                    <span>+ Спецификация</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddAttachment('Техническое задание')}
+                    className="px-2 py-1 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 rounded border border-slate-200 transition-colors flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3 text-indigo-600" />
+                    <span>+ Техническое задание</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddAttachment('Акт приема-передачи')}
+                    className="px-2 py-1 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 rounded border border-slate-200 transition-colors flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3 text-indigo-600" />
+                    <span>+ Акт приема-передачи</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddAttachment('Смета расходов')}
+                    className="px-2 py-1 text-[11px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 rounded border border-slate-200 transition-colors flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3 text-indigo-600" />
+                    <span>+ Смета расходов</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Attachments List */}
+              <div className="space-y-3 pt-1">
+                {data.attachments && data.attachments.map((att, idx) => {
+                  const isPreview = attPreviewMap[att.id] ?? att.content.includes('<table');
+                  const hasTable = att.content.includes('<table');
+
+                  return (
+                    <div key={att.id} className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2.5 shadow-2xs">
+                      <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 rounded bg-indigo-600 text-white font-bold text-[10px] flex items-center justify-center">
+                            №{att.number}
+                          </span>
+                          <span className="text-xs font-bold text-slate-800">
+                            {att.title || `Приложение № ${att.number}`}
+                          </span>
+                          {hasTable && (
+                            <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded flex items-center gap-0.5">
+                              <Table className="w-2.5 h-2.5 text-emerald-600" />
+                              Табличный вид
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          {/* Toggle Preview / Code button */}
+                          <button
+                            type="button"
+                            onClick={() => setAttPreviewMap(prev => ({ ...prev, [att.id]: !isPreview }))}
+                            className="px-2 py-0.5 text-[10px] font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded transition-colors flex items-center gap-1"
+                            title={isPreview ? 'Редактировать HTML/текст' : 'Показать отформатированный вид'}
+                          >
+                            {isPreview ? (
+                              <>
+                                <Pencil className="w-3 h-3 text-slate-600" />
+                                <span>Редактировать</span>
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="w-3 h-3 text-indigo-600" />
+                                <span>Предпросмотр</span>
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleMoveAttachment(idx, 'up')}
+                            disabled={idx === 0}
+                            className="p-1 hover:bg-slate-200 text-slate-600 disabled:opacity-30 rounded transition-colors"
+                            title="Переместить выше"
+                          >
+                            <ArrowUp className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveAttachment(idx, 'down')}
+                            disabled={idx === (data.attachments?.length || 0) - 1}
+                            className="p-1 hover:bg-slate-200 text-slate-600 disabled:opacity-30 rounded transition-colors"
+                            title="Переместить ниже"
+                          >
+                            <ArrowDown className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteAttachment(att.id)}
+                            className="p-1 hover:bg-rose-100 text-rose-600 rounded transition-colors ml-1"
+                            title="Удалить приложение"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div className="sm:col-span-2">
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                            Наименование приложения
+                          </label>
+                          <input
+                            type="text"
+                            value={att.title}
+                            onChange={(e) => handleUpdateAttachment(att.id, { title: e.target.value })}
+                            placeholder="Например: Спецификация оборудования"
+                            className="w-full text-xs p-1.5 rounded border border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 outline-none"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                              Листов
+                            </label>
+                            <input
+                              type="number"
+                              min={1}
+                              value={att.sheetsCount || 1}
+                              onChange={(e) => handleUpdateAttachment(att.id, { sheetsCount: parseInt(e.target.value) || 1 })}
+                              className="w-full text-xs p-1.5 rounded border border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 outline-none text-center font-mono"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                              Экземпляров
+                            </label>
+                            <input
+                              type="number"
+                              min={1}
+                              value={att.copiesCount || 1}
+                              onChange={(e) => handleUpdateAttachment(att.id, { copiesCount: parseInt(e.target.value) || 1 })}
+                              className="w-full text-xs p-1.5 rounded border border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 outline-none text-center font-mono"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Quick Table Templates & Row Insertion Toolbar */}
+                      <div className="bg-white p-2 rounded border border-slate-200/90 flex flex-wrap items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase mr-1">Табличные шаблоны:</span>
+                        
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateAttachment(att.id, { 
+                            content: EQUIPMENT_SPECIFICATION_HTML,
+                            title: att.title && att.title !== `Приложение № ${att.number}` ? att.title : 'Спецификация оборудования'
+                          })}
+                          className="px-2 py-1 text-[10.5px] bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-semibold rounded border border-indigo-200 transition-colors flex items-center gap-1"
+                          title="Заполнить стандартной таблицей спецификации оборудования Тепломаш"
+                        >
+                          <Table className="w-3 h-3 text-indigo-600" />
+                          <span>📊 Спецификация оборудования</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateAttachment(att.id, { 
+                            content: appendEquipmentRowToHtml(att.content) 
+                          })}
+                          className="px-2 py-1 text-[10.5px] bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-semibold rounded border border-emerald-200 transition-colors flex items-center gap-1"
+                          title="Добавить еще одну строку с оборудованием в таблицу"
+                        >
+                          <Plus className="w-3 h-3 text-emerald-600" />
+                          <span>➕ Добавить позицию</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateAttachment(att.id, { 
+                            content: TECHNICAL_ASSIGNMENT_HTML,
+                            title: att.title && att.title !== `Приложение № ${att.number}` ? att.title : 'Техническое задание'
+                          })}
+                          className="px-2 py-1 text-[10.5px] bg-slate-100 hover:bg-slate-200 text-slate-800 rounded border border-slate-200 transition-colors flex items-center gap-1"
+                          title="Таблица требований и нормативных параметров"
+                        >
+                          <span>📋 Таблица ТЗ</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateAttachment(att.id, { 
+                            content: COST_ESTIMATE_HTML,
+                            title: att.title && att.title !== `Приложение № ${att.number}` ? att.title : 'Смета расходов'
+                          })}
+                          className="px-2 py-1 text-[10.5px] bg-slate-100 hover:bg-slate-200 text-slate-800 rounded border border-slate-200 transition-colors flex items-center gap-1"
+                          title="Таблица сметы стоимости"
+                        >
+                          <span>💰 Таблица сметы</span>
+                        </button>
+                      </div>
+
+                      {/* Content view / editor */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase">
+                            Содержание / Текст листа приложения
+                          </label>
+                          <span className="text-[10px] text-slate-400">
+                            {isPreview ? 'Режим предпросмотра таблицы' : 'Режим редактирования кода / текста'}
+                          </span>
+                        </div>
+
+                        {isPreview ? (
+                          <div 
+                            className="w-full min-h-[100px] max-h-[260px] overflow-auto p-3 bg-white rounded border border-indigo-200 text-xs shadow-2xs font-sans"
+                            dangerouslySetInnerHTML={{ __html: att.content }}
+                          />
+                        ) : (
+                          <textarea
+                            rows={6}
+                            value={att.content}
+                            onChange={(e) => handleUpdateAttachment(att.id, { content: e.target.value })}
+                            placeholder="Введите содержание или HTML таблицу приложения..."
+                            className="w-full text-xs p-2 rounded border border-slate-300 bg-white focus:ring-1 focus:ring-indigo-500 outline-none font-mono leading-relaxed"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  onClick={() => handleAddAttachment()}
+                  className="w-full py-2 border-2 border-dashed border-indigo-300 hover:border-indigo-500 hover:bg-indigo-50/50 text-indigo-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span>Добавить еще одно приложение</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 6. PUBLISH DOCUMENT ACTION CARD */}
       <div className="bg-slate-900 text-white rounded-xl p-5 space-y-4 shadow-lg border border-slate-800">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Send className="w-5 h-5 text-emerald-400" />
-              <h3 className="font-bold text-sm text-white">5. Публикация и регистрация документа в базе</h3>
+              <h3 className="font-bold text-sm text-white">6. Публикация и регистрация документа в базе</h3>
             </div>
             <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
               При нажатии «Опубликовать и занести в базу писем» письму автоматически присваивается уникальный регистрационный номер из Единого реестра (с учетом даты и подразделения), письмо заносится в реестр, а все поля формы сбрасываются для составления нового документа.

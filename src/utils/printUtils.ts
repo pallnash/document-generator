@@ -1,12 +1,12 @@
 import { DocumentData } from '../types';
 
 /**
- * Triggers the browser system print dialog for the A4 document sheet (#document-a4-sheet).
+ * Triggers the browser system print dialog for the A4 document sheets (#document-printable-area).
  * Uses a dedicated popup window loaded with document styles to bypass iframe sandbox limits.
  */
 export function triggerSystemPrint(docData?: DocumentData): boolean {
   const docTitle = docData ? `${docData.docType || 'Документ'} ${docData.refNumber ? '№ ' + docData.refNumber : ''}` : 'Печать документа';
-  const element = document.getElementById('document-a4-sheet');
+  const element = document.getElementById('document-printable-area') || document.getElementById('document-a4-sheet');
 
   if (!element) {
     try {
@@ -46,7 +46,6 @@ export function triggerSystemPrint(docData?: DocumentData): boolean {
                 padding: 0 !important;
                 background: #f1f5f9 !important;
                 width: 100% !important;
-                height: 100% !important;
                 font-family: system-ui, -apple-system, sans-serif;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -63,11 +62,59 @@ export function triggerSystemPrint(docData?: DocumentData): boolean {
                   margin: 0 !important;
                   box-shadow: none !important;
                 }
-                #document-a4-sheet {
+                #document-printable-area, #document-a4-sheet {
                   box-shadow: none !important;
                   margin: 0 !important;
                   border: none !important;
+                  gap: 0 !important;
                 }
+                .a4-page, #document-a4-sheet {
+                  position: relative !important;
+                  left: auto !important;
+                  top: auto !important;
+                  transform: none !important;
+                  page-break-before: auto !important;
+                  page-break-after: always !important;
+                  break-after: page !important;
+                  page-break-inside: avoid !important;
+                  break-inside: avoid !important;
+                  box-shadow: none !important;
+                  margin: 0 !important;
+                  border: none !important;
+                  width: 210mm !important;
+                  height: 297mm !important;
+                  min-height: 297mm !important;
+                  max-height: 297mm !important;
+                  overflow: hidden !important;
+                  background: white !important;
+                }
+                .a4-page:last-child {
+                  page-break-after: auto !important;
+                  break-after: auto !important;
+                }
+              }
+              /* Table styling for printed documents (ГОСТ Р 7.0.97) */
+              table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-top: 8px !important;
+                margin-bottom: 12px !important;
+                font-size: 9.5pt !important;
+              }
+              table th, table td {
+                border: 1px solid #1e293b !important;
+                padding: 5px 6px !important;
+                vertical-align: middle !important;
+                box-sizing: border-box !important;
+              }
+              table th {
+                background-color: #f1f5f9 !important;
+                font-weight: bold !important;
+                text-align: center !important;
+                color: #0f172a !important;
+                font-size: 9pt !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               .no-print-wrapper {
                 background: #1e293b;
@@ -101,14 +148,19 @@ export function triggerSystemPrint(docData?: DocumentData): boolean {
               }
               .print-container {
                 display: flex;
-                justify-content: center;
+                flex-direction: column;
+                align-items: center;
                 padding: 20px;
               }
-              #document-a4-sheet {
+              .a4-page {
+                position: relative !important;
+                left: auto !important;
+                top: auto !important;
                 transform: none !important;
                 box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-                margin: 0 auto !important;
+                margin: 0 auto 24px auto !important;
                 width: 210mm !important;
+                height: 297mm !important;
                 min-height: 297mm !important;
                 max-height: 297mm !important;
                 box-sizing: border-box !important;

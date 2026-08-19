@@ -26,6 +26,8 @@ export interface SavedDraft {
   id: string;
   title: string;
   savedAt: string;
+  author?: string;
+  authorRole?: 'admin' | 'user';
   version: string; // e.g. "1.0", "1.1", "2.0"
   versionHistory?: DocumentVersion[];
   data: DocumentData;
@@ -36,6 +38,8 @@ interface DraftsModalProps {
   onClose: () => void;
   drafts: SavedDraft[];
   currentDoc: DocumentData;
+  userRole?: 'admin' | 'user' | null;
+  currentUserName?: string;
   onLoadDraft: (draft: DocumentData) => void;
   onSaveCurrentAsDraft: (title: string, bumpType?: 'none' | 'minor' | 'major', comment?: string) => void;
   onDeleteDraft: (id: string) => void;
@@ -59,6 +63,8 @@ export const DraftsModal: React.FC<DraftsModalProps> = ({
   onClose,
   drafts,
   currentDoc,
+  userRole,
+  currentUserName,
   onLoadDraft,
   onSaveCurrentAsDraft,
   onDeleteDraft,
@@ -85,7 +91,15 @@ export const DraftsModal: React.FC<DraftsModalProps> = ({
     setIsSaving(false);
   };
 
-  const filteredDrafts = drafts.filter(draft => 
+  const userFilteredDrafts = drafts.filter(draft => {
+    if (userRole === 'admin') return true; // Administrator sees all documents
+    const docAuthor = (draft.author || draft.data.signature?.senderName || '').trim().toLowerCase();
+    const currentName = (currentUserName || currentDoc.signature?.senderName || '').trim().toLowerCase();
+    if (!currentName || !docAuthor) return true;
+    return docAuthor === currentName || docAuthor.includes(currentName) || currentName.includes(docAuthor);
+  });
+
+  const filteredDrafts = userFilteredDrafts.filter(draft => 
     draft.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     draft.data.docType.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (draft.data.refNumber && draft.data.refNumber.toLowerCase().includes(searchQuery.toLowerCase())) ||

@@ -411,7 +411,7 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                <span>Отдел / Подразделение</span>
+                <span>Инициалы и фамилия (ФИО)</span>
                 <span className="text-[10px] font-normal text-slate-400 lowercase flex items-center gap-1">
                   <Lock className="w-2.5 h-2.5" /> из базы tmdata/
                 </span>
@@ -419,9 +419,9 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
               <input
                 type="text"
                 readOnly
-                value={signature.senderDepartment || ''}
+                value={signature.senderName || ''}
                 placeholder="Заполняется автоматически из базы tmdata/"
-                className="w-full text-xs p-2.5 rounded border border-slate-200 bg-slate-50 text-slate-700 font-medium outline-none cursor-default"
+                className="w-full text-xs p-2.5 rounded border border-slate-200 bg-slate-50 text-slate-900 font-bold outline-none cursor-default"
                 title="Поле подтягивается из базы сотрудников tmdata/ (ручное редактирование запрещено)"
               />
             </div>
@@ -444,206 +444,81 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                <span>Инициалы и фамилия (ФИО)</span>
-                <span className="text-[10px] font-normal text-slate-400 lowercase flex items-center gap-1">
-                  <Lock className="w-2.5 h-2.5" /> из базы tmdata/
-                </span>
-              </label>
-              <input
-                type="text"
-                readOnly
-                value={signature.senderName || ''}
-                placeholder="Заполняется автоматически из базы tmdata/"
-                className="w-full text-xs p-2.5 rounded border border-slate-200 bg-slate-50 text-slate-900 font-bold outline-none cursor-default"
-                title="Поле подтягивается из базы сотрудников tmdata/ (ручное редактирование запрещено)"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                <span>Наименование организации</span>
-                <span className="text-[10px] font-normal text-slate-400 lowercase flex items-center gap-1">
-                  <Lock className="w-2.5 h-2.5" /> из базы tmdata/
-                </span>
-              </label>
-              <input
-                type="text"
-                readOnly
-                value={signature.senderOrganization || ''}
-                placeholder="Заполняется автоматически из базы tmdata/"
-                className="w-full text-xs p-2.5 rounded border border-slate-200 bg-slate-50 text-slate-700 font-medium outline-none cursor-default"
-                title="Поле подтягивается из базы сотрудников tmdata/ (ручное редактирование запрещено)"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Signature Type Selection (Обычная / Электронная) */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-xs">
-        <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
-          Выбор типа подписи документа:
-        </label>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Option 1: Standard Signature */}
-          <button
-            type="button"
-            onClick={() => {
-              onChange({
-                ...signature,
-                useDigitalSignature: false
-              });
-            }}
-            className={`p-3.5 rounded-lg border text-left transition-all flex items-start gap-3 cursor-pointer ${
-              !signature.useDigitalSignature
-                ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 ring-1 ring-indigo-600 shadow-xs'
-                : 'border-slate-200 hover:border-slate-300 bg-slate-50 text-slate-700'
-            }`}
-          >
-            <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
-              !signature.useDigitalSignature ? 'border-indigo-600 bg-indigo-600' : 'border-slate-400 bg-white'
-            }`}>
-              {!signature.useDigitalSignature && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-            </div>
-            <div>
-              <div className="text-xs font-bold text-slate-900">Обычная подпись</div>
-              <div className="text-[11px] text-slate-500 mt-0.5 leading-tight">
-                Ручная роспись, факсимиле или поле для личной подписи
-              </div>
-            </div>
-          </button>
-
-          {/* Option 2: Electronic Digital Signature (ЭП) */}
-          <button
-            type="button"
-            onClick={() => {
-              const key = signature.digitalSignatureKey || generateDigitalSignatureKey();
-              const dateStr = signature.digitalSignatureDate || new Date().toLocaleString('ru-RU', {
-                day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-              });
-              onChange({
-                ...signature,
-                useDigitalSignature: true,
-                digitalSignatureKey: key,
-                digitalSignatureDate: dateStr
-              });
-            }}
-            className={`p-3.5 rounded-lg border text-left transition-all flex items-start gap-3 cursor-pointer ${
-              signature.useDigitalSignature
-                ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 ring-1 ring-indigo-600 shadow-xs'
-                : 'border-slate-200 hover:border-slate-300 bg-slate-50 text-slate-700'
-            }`}
-          >
-            <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
-              signature.useDigitalSignature ? 'border-indigo-600 bg-indigo-600' : 'border-slate-400 bg-white'
-            }`}>
-              {signature.useDigitalSignature && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-            </div>
-            <div>
-              <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Электронная подпись (ЭП)</span>
-              </div>
-              <div className="text-[11px] text-slate-500 mt-0.5 leading-tight">
-                Официальный штамп с автоматически сгенерированным уникальным ключом
-              </div>
-            </div>
-          </button>
-        </div>
-
-        {/* Digital Signature Auto-Generated Stamp Preview */}
-        {signature.useDigitalSignature && (
-          <div className="mt-3 pt-3 border-t border-indigo-100 space-y-2">
-            <div className="border-2 border-indigo-900 rounded-md bg-emerald-50/30 p-3 shadow-2xs space-y-1 text-xs">
-              <div className="border-b border-indigo-200 pb-1 font-bold text-indigo-900 flex items-center justify-between">
-                <span className="flex items-center gap-1.5 uppercase text-[11px] tracking-wide">
-                  <ShieldCheck className="w-4 h-4 text-indigo-700" />
-                  ДОКУМЕНТ ПОДПИСАН ЭЛЕКТРОННОЙ ПОДПИСЬЮ
-                </span>
-              </div>
-              <div className="space-y-1 text-[11px] text-slate-800 pt-0.5">
-                <div>
-                  <span className="text-slate-500 font-medium">Ключ ЭП (сохраняется в реестр):</span>{' '}
-                  <span className="font-mono font-bold text-indigo-950 bg-indigo-100/80 px-1.5 py-0.5 rounded border border-indigo-300">
-                    {signature.digitalSignatureKey || generateDigitalSignatureKey()}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-500 font-medium">Владелец ключа:</span>{' '}
-                  <strong className="font-semibold text-slate-900">{signature.senderName || 'Сотрудник'}</strong> ({signature.senderPosition || 'Должность'})
-                </div>
-                <div>
-                  <span className="text-slate-500 font-medium">Дата и время подписания:</span>{' '}
-                  <span>{signature.digitalSignatureDate || new Date().toLocaleString('ru-RU')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Standard Graphic Signature Options (Shown ONLY when Digital Signature is OFF) */}
-      {!signature.useDigitalSignature && (
-        <>
-          <div className="bg-white border border-slate-200 rounded p-4 space-y-4 shadow-xs">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2.5">
-              <div className="w-5 h-5 rounded-sm bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <PenTool className="w-3 h-3" />
-              </div>
-              <span>Вид подписи в документе (Обычная / Графическая)</span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => onChange({ ...signature, type: 'placeholder' })}
-                className={`p-3 rounded border text-center transition-all flex flex-col items-center gap-1.5 ${
-                  signature.type === 'placeholder'
-                    ? 'border-indigo-600 bg-indigo-50/50 shadow-xs'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
-                }`}
-              >
-                <div className="w-full border-b border-dashed border-slate-400 py-1 text-[11px] text-slate-400">________</div>
-                <span className="text-xs font-semibold text-slate-800">Место для личной подписи</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsCanvasOpen(true)}
-                className={`p-3 rounded border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
-                  signature.type === 'canvas' || (signature.type === 'image' && signature.imageUrl)
-                    ? 'border-indigo-600 bg-indigo-50/50 shadow-xs'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
-                }`}
-              >
-                <PenTool className="w-5 h-5 text-indigo-600" />
-                <span className="text-xs font-semibold text-slate-800">Нарисовать на экране</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="p-3 rounded border border-slate-200 hover:border-slate-300 bg-white text-center transition-all flex flex-col items-center justify-center gap-1.5"
-              >
-                <Upload className="w-5 h-5 text-indigo-600" />
-                <span className="text-xs font-semibold text-slate-800">Загрузить сканированную PNG</span>
-              </button>
-            </div>
-
+          <div>
+            <label className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              <span>Отдел / Подразделение</span>
+              <span className="text-[10px] font-normal text-slate-400 lowercase flex items-center gap-1">
+                <Lock className="w-2.5 h-2.5" /> из базы tmdata/
+              </span>
+            </label>
             <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleSignatureImageUpload}
-              className="hidden"
+              type="text"
+              readOnly
+              value={signature.senderDepartment || ''}
+              placeholder="Заполняется автоматически из базы tmdata/"
+              className="w-full text-xs p-2.5 rounded border border-slate-200 bg-slate-50 text-slate-700 font-medium outline-none cursor-default"
+              title="Поле подтягивается из базы сотрудников tmdata/ (ручное редактирование запрещено)"
             />
+          </div>
+        </div>
+      </div>
 
-            {/* Display Current Signature Graphic & Save to Library Option */}
-            {signature.imageUrl && (
+      {/* Standard Signature Options */}
+      <div className="bg-white border border-slate-200 rounded p-4 space-y-4 shadow-xs">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2.5">
+          <div className="w-5 h-5 rounded-sm bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <PenTool className="w-3 h-3" />
+          </div>
+          <span>Вид подписи в документе</span>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => onChange({ ...signature, type: 'placeholder' })}
+            className={`p-3 rounded border text-center transition-all flex flex-col items-center gap-1.5 ${
+              signature.type === 'placeholder'
+                ? 'border-indigo-600 bg-indigo-50/50 shadow-xs'
+                : 'border-slate-200 hover:border-slate-300 bg-white'
+            }`}
+          >
+            <div className="w-full border-b border-dashed border-slate-400 py-1 text-[11px] text-slate-400">________</div>
+            <span className="text-xs font-semibold text-slate-800">Место для личной подписи</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsCanvasOpen(true)}
+            className={`p-3 rounded border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
+              signature.type === 'canvas' || (signature.type === 'image' && signature.imageUrl)
+                ? 'border-indigo-600 bg-indigo-50/50 shadow-xs'
+                : 'border-slate-200 hover:border-slate-300 bg-white'
+            }`}
+          >
+            <PenTool className="w-5 h-5 text-indigo-600" />
+            <span className="text-xs font-semibold text-slate-800">Нарисовать на экране</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="p-3 rounded border border-slate-200 hover:border-slate-300 bg-white text-center transition-all flex flex-col items-center justify-center gap-1.5"
+          >
+            <Upload className="w-5 h-5 text-indigo-600" />
+            <span className="text-xs font-semibold text-slate-800">Загрузить сканированную PNG</span>
+          </button>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleSignatureImageUpload}
+          className="hidden"
+        />
+
+        {/* Display Current Signature Graphic & Save to Library Option */}
+        {signature.imageUrl && (
               <div className="space-y-3">
                 <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -813,8 +688,6 @@ export const SignatureSettings: React.FC<SignatureSettingsProps> = ({
               )}
             </div>
           )}
-        </>
-      )}
 
       {/* Signature Canvas Modal */}
       <SignatureCanvasModal

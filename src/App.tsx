@@ -26,6 +26,7 @@ import {
   getNextDepartmentSeq, 
   generateDocumentNumber 
 } from './constants/departmentCodes';
+import { declineJobPosition } from './utils/declensionUtils';
 import type { RegisteredDocument } from './types';
 import { 
   FileText, 
@@ -129,7 +130,15 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         const sanitized = sanitizeDocumentDataEncoding(parsed);
-        // Always enforce official locked Teplomash header and GOST R 7.0.97-2025 default margins
+        // Clear legacy stale refNumber if unpublished
+        if (!sanitized.isPublished && sanitized.refNumber === '0508/1И') {
+          sanitized.refNumber = '';
+        }
+        // Always enforce official locked Teplomash header and GOST R 7.0.97-2025 defaults
+        sanitized.fontFamily = 'Times New Roman';
+        if (sanitized.fontSize !== 12 && sanitized.fontSize !== 14) {
+          sanitized.fontSize = 14;
+        }
         sanitized.header = {
           ...sanitized.header,
           type: 'preset',
@@ -157,10 +166,7 @@ export default function App() {
   const [savedNotification, setSavedNotification] = useState<boolean>(false);
 
   const handleApplyEmployeeRecipient = (emp: TeplomashEmployee) => {
-    let formattedPosition = emp.dativePosition || emp.position;
-    if (emp.department && !formattedPosition.toLowerCase().includes(emp.department.toLowerCase())) {
-      formattedPosition = `${formattedPosition} (${emp.department})`;
-    }
+    const formattedPosition = emp.dativePosition || declineJobPosition(emp.position, 'dative');
 
     setDocData(prev => ({
       ...prev,
@@ -303,6 +309,8 @@ export default function App() {
       id: `draft-${Date.now()}`,
       title: title,
       savedAt: nowStr,
+      author: docData.signature.senderName || 'Пользователь',
+      authorRole: userRole || 'user',
       version: newVersion,
       versionHistory: updatedHistory,
       data: updatedDocData
@@ -506,16 +514,18 @@ ${docData.signature.senderPosition} __________ ${docData.signature.senderName}
 
             <div className="h-5 w-px bg-[#E4E4E7] my-auto mx-1" />
 
-            {/* Registry Button on Main Top Panel */}
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<FileText className="w-3.5 h-3.5 text-[#2563EB]" />}
-              onClick={() => setIsRegistryOpen(true)}
-              title="Единый реестр исходящих писем АО «НПО «Тепломаш»"
-            >
-              Реестр писем
-            </Button>
+            {/* Registry Button on Main Top Panel - ONLY for Administrator */}
+            {isAdmin && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<FileText className="w-3.5 h-3.5 text-[#2563EB]" />}
+                onClick={() => setIsRegistryOpen(true)}
+                title="Единый реестр исходящих писем АО «НПО «Тепломаш» (только для администратора)"
+              >
+                Реестр писем
+              </Button>
+            )}
 
             <Button
               variant="secondary"
@@ -683,7 +693,7 @@ ${docData.signature.senderPosition} __________ ${docData.signature.senderName}
 
           {/* Render A4 Sheet */}
           <div className="w-full flex-1 flex justify-center items-start overflow-hidden">
-            <DocumentPreview data={docData} scale={zoomLevel} />
+            <DocumentPreview data={docData} scale={zoomLevel} onUpdateDocData={setDocData} />
           </div>
         </div>
 
@@ -704,6 +714,8 @@ ${docData.signature.senderPosition} __________ ${docData.signature.senderName}
         onClose={() => setIsDraftsOpen(false)}
         drafts={draftsList}
         currentDoc={docData}
+        userRole={userRole}
+        currentUserName={docData.signature.senderName}
         onLoadDraft={handleLoadDraft}
         onSaveCurrentAsDraft={handleSaveCurrentAsDraft}
         onDeleteDraft={handleDeleteDraft}

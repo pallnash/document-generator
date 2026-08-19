@@ -39,6 +39,15 @@ export interface SignatureConfig {
   digitalSignatureDate?: string;
 }
 
+export interface DocumentAttachment {
+  id: string;
+  number: number; // 1, 2, 3...
+  title: string; // e.g. "Техническое задание на разработку", "Спецификация оборудования"
+  content: string; // Rich text HTML / text content
+  sheetsCount?: number; // e.g. 2 листа
+  copiesCount?: number; // e.g. 1 экз.
+}
+
 export interface DocumentData {
   id: string;
   updatedAt: string;
@@ -74,6 +83,14 @@ export interface DocumentData {
   // Content Body
   content: string; // HTML or multi-paragraph text
 
+  // Multi-page management (ГОСТ Р 7.0.97-2025)
+  allowMultiPage?: boolean; // User agreed to split into multiple pages
+  
+  // Attachments (Реквизит «Отметка о приложении» и листы приложений)
+  showAttachmentsMark?: boolean; // Display attachment mark before signature
+  attachmentsMarkText?: string; // Custom attachment note e.g. "Приложение: на 2 л. в 1 экз."
+  attachments?: DocumentAttachment[]; // Attachment pages
+
   // Revocation & Correction status (for published documents)
   isRevoked?: boolean;
   revokedAt?: string; // e.g. "17.08.2026 15:30"
@@ -85,8 +102,8 @@ export interface DocumentData {
   // 4. "Кто написал письмо" and Signature
   signature: SignatureConfig;
 
-  // Styling & Typography
-  fontFamily: 'Times New Roman' | 'Arial' | 'Roboto' | 'Georgia' | 'Calibri';
+  // Styling & Typography (ГОСТ Р 7.0.97-2025)
+  fontFamily: 'Times New Roman' | 'PT Astra Serif' | 'PT Astra Sans' | 'Arial' | 'Roboto' | 'Georgia' | 'Calibri';
   fontSize: number; // base font size in pt or px (e.g. 14)
   lineSpacing: number; // 1.15, 1.5, etc.
   margins: {

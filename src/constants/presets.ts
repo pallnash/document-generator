@@ -35,7 +35,7 @@ export const INITIAL_DOCUMENT: DocumentData = {
   docType: 'СЛУЖЕБНАЯ ЗАПИСКА',
   docSubject: 'О предоставлении доступа к папке \\\\Electrica',
   date: new Date().toLocaleDateString('ru-RU'),
-  refNumber: '0508/1И',
+  refNumber: '',
   showInRefNumber: false,
   inRefNumber: '',
   city: 'г. Санкт-Петербург',
@@ -51,6 +51,7 @@ export const INITIAL_DOCUMENT: DocumentData = {
   fontFamily: 'Times New Roman',
   fontSize: 14,
   lineSpacing: 1.5,
+  allowMultiPage: true,
   margins: {
     top: 20,
     bottom: 20,
@@ -97,6 +98,7 @@ export const getInitialBlankDocument = (): DocumentData => ({
   fontFamily: 'Times New Roman',
   fontSize: 14,
   lineSpacing: 1.5,
+  allowMultiPage: true,
   margins: {
     top: 20,
     bottom: 20,

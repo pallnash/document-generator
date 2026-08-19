@@ -15,13 +15,33 @@
  *  - прочие неизвестные теги "разворачиваются" (теряют обёртку, текст остаётся).
  */
 const ALLOWED_TAGS = new Set([
-  'p', 'br', 'ul', 'ol', 'li',
+  'p', 'br', 'hr', 'ul', 'ol', 'li',
   'strong', 'b', 'em', 'i', 'u', 's', 'sub', 'sup',
-  'a', 'span', 'blockquote', 'h3', 'h4', 'h5', 'h6',
+  'a', 'span', 'div', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col'
 ]);
 
 const ALLOWED_ATTRS: Record<string, string[]> = {
-  a: ['href', 'title'],
+  a: ['href', 'title', 'target', 'rel', 'style', 'class'],
+  table: ['border', 'cellpadding', 'cellspacing', 'style', 'class', 'width', 'align'],
+  th: ['style', 'class', 'colspan', 'rowspan', 'align', 'valign', 'width'],
+  td: ['style', 'class', 'colspan', 'rowspan', 'align', 'valign', 'width'],
+  tr: ['style', 'class', 'align', 'valign'],
+  colgroup: ['span', 'style', 'width'],
+  col: ['span', 'style', 'width'],
+  p: ['style', 'class', 'align'],
+  div: ['style', 'class', 'align'],
+  span: ['style', 'class'],
+  h1: ['style', 'class'],
+  h2: ['style', 'class'],
+  h3: ['style', 'class'],
+  h4: ['style', 'class'],
+  h5: ['style', 'class'],
+  h6: ['style', 'class'],
+  blockquote: ['style', 'class'],
+  ul: ['style', 'class'],
+  ol: ['style', 'class'],
+  li: ['style', 'class'],
 };
 
 /** Теги, которые вырезаются целиком (вместе с содержимым). */
